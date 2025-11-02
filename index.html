@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AppLoads — SADC Load Board</title>
+    <meta name="theme-color" content="#0b7d62" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="manifest" href="/manifest.json">
+
+<!-- Theme Color -->
+<meta name="theme-color" content="#0b7d62">
+
+<!-- Apple Touch Icons -->
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192.png">
+
+<!-- Apple Splash Screen (simplified) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AppLoads">
+
+<!-- Windows Tile -->
+<meta name="msapplication-TileImage" content="/icons/icon-144.png">
+<meta name="msapplication-TileColor" content="#0b7d62">
+<meta name="msapplication-config" content="/browserconfig.xml">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/icons/icon-32.png">
+<link rel="shortcut icon" href="/icons/icon-32.png">
+</head>
+<body>
+    <header>
+        <h1>🚛 AppLoads</h1>
+        <div class="sub">SADC • Loads • Trucks • Sales</div>
+    </header>
+    
+    <div class="wrap">
+        <!-- HOME -->
+        <section id="home" class="section active">
+            <div class="card">
+                <div class="between">
+                    <h2 style="margin:0;font-size:1.05rem">Welcome to AppLoads</h2>
+                    <span class="badge">Open to Truckers • SADC</span>
+                </div>
+                <p class="muted"></p><!-- placeholder fór future Notíces -->
+                <div class="quick">
+                    <button class="btn secondary" data-action="browse-loads">📦 Browse Loads</button><!-- onclick removed -->
+                    <button class="btn secondary" data-action="browse-trucks">🚛 Browse Sales</button><!-- onclick removed -->
+                    <button class="btn secondary" data-action="post-load">➕ Post Load</button><!-- onclick removed -->
+                    <button class="btn secondary" data-action="post-truck">➕ Post Sale</button><!-- onclick removed -->
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="margin:0 0 8px 0;font-size:1rem">Latest Loads</h3>
+                <div id="homeLatestLoads"></div>
+            </div>
+            <div class="card">
+                <h3 style="margin:0 0 8px 0;font-size:1rem">Latest Sales</h3>
+                <div id="homeLatestSales"></div>
+            </div>
+              <!-- ADD THIS -->
+    <p style="font-size:10px; color:gray; text-align:center; margin-top:20px;">
+    </p><!-- PLACE HOLDER FOR FUTURE -->
+        </section>
+
+        <!-- AVAILABLE LOADS -->
+        <section id="loads" class="section">
+            <div class="card">
+                <h2 style="margin:0 0 8px 0;font-size:1.05rem">Available Loads</h2>
+                <div class="filter-chips">
+                    <div class="filter-chip active" data-filter="all">All Loads</div>
+                    <div class="filter-chip" data-filter="popular">Most Popular</div>
+                    <div class="filter-chip" data-filter="recent">Recently Added</div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label>Origin Country</label>
+                        <select id="filterOrigin"></select><!-- onchange removed -->
+                    </div>
+                    <div>
+                        <label>Destination Country</label>
+                        <select id="filterDest"></select><!-- onchange removed -->
+                    </div>
+                </div>
+                <div class="row mt8">
+                    <input id="filterText" placeholder="Search city, cargo, terms…" /><!-- oninput removed -->
+                    <button class="btn secondary" data-action="clear-filters">Clear Filters</button><!-- onclick removed -->
+                </div>
+            </div>
+            <div id="loadsList"></div>
+            <p id="emptyLoads" class="list-empty">No loads match your filters.</p>
+        </section>
+
+<!-- POST LOAD -->
+<section id="post" class="section">
+    <div class="card">
+        <h2 style="margin:0 0 8px 0;font-size:1.05rem">Post a Load</h2>
+<div class="row">
+    <div>
+        <label>Origin Country</label>
+        <select id="originCountry">
+            <option value="">Select country</option>
+            <!-- Countries will be filled by JavaScript -->
+            <option value="Other">Other</option>
+        </select>
+        <input id="originCountryOther" placeholder="Specify country" style="display: none; margin-top: 8px;" />
+    </div>
+    <div>
+        <label>Origin City / Port / Border</label>
+        <input id="originCity" placeholder="e.g. Walvis Bay, Harare" />
+    </div>
+</div>
+  <div class="row">
+    <div>
+        <label>Destination Country</label>
+        <select id="destCountry">
+            <option value="">Select country</option>
+            <!-- Countries will be filled by JavaScript -->
+            <option value="Other">Other</option>
+        </select>
+        <input id="destCountryOther" placeholder="Specify country" style="display: none; margin-top: 8px;" />
+    </div>
+    <div>
+        <label>Destination City / Port / Border</label>
+        <input id="destCity" placeholder="e.g. Durban, Lusaka" />
+    </div>
+</div>
+        <label for="cargo">Cargo Details</label>
+        <input id="cargo" placeholder="e.g. 30t cement, 40ft container" /><!-- oninput removed -->
+        
+      <!-- NEW: Currency and Pricing Type -->
+<div class="row">
+    <div>
+        <label>Currency</label>
+        <select id="currency">
+            <option value="USD">US Dollar ($)</option>
+            <option value="ZAR">South African Rand (R)</option>
+            <option value="BWP">Botswana Pula (P)</option>
+            <option value="ZWL">Zimbabwe Dollar (ZWL$)</option>
+            <option value="ZMW">Zambian Kwacha (K)</option>
+            <option value="MWK">Malawian Kwacha (MK)</option>
+            <option value="TZS">Tanzanian Shilling (TSh)</option>
+            <option value="Other">Other (specify)</option>
+        </select>
+    </div>
+    <div id="otherCurrencyContainer" style="display: none;">
+        <label>Other Currency</label>
+        <input id="otherCurrency" placeholder="e.g. EUR, GBP, etc." />
+    </div>
+</div>
+        
+<div class="row">
+    <div>
+        <label>Price</label>
+        <input id="price" type="number" min="0" step="1" placeholder="e.g. 2500" />
+        <div class="radio-group" style="margin-top: 8px;">
+            <label>
+                <input type="radio" name="pricingType" value="total" checked />
+                <span>Total Price</span>
+            </label>
+            <label>
+                <input type="radio" name="pricingType" value="per_ton" />
+                <span>Per Ton</span>
+            </label>
+        </div>
+    </div>
+    <div>
+        <!-- This div can be empty or removed, but keeping it for layout balance -->
+    </div>
+</div>
+        
+<label>Payment Terms</label>
+<select id="terms">
+    <option value="Cash on Delivery">Cash on Delivery</option>
+    <option value="Upfront">Upfront</option>
+    <option value="50/50">50% Upfront / 50% on Delivery</option>
+    <option value="70/30">70/30</option>
+    <option value="80/20">80/20</option>
+    <option value="7 Days">7 Days</option>
+    <option value="14 Days">14 Days</option>
+    <option value="30 Days">30 Days</option>
+    <option value="Other">Other</option>
+</select>
+<input id="termsOther" placeholder="Specify payment terms" style="display: none; margin-top: 8px;" />
+        <div class="row">
+            <div>
+                <label>Ready Date</label>
+                <input id="ready" type="date" /><!-- oninput removed -->
+            </div>
+            <div>
+                <label>Contact (auto from My Account)</label>
+                <input id="contactOverride" placeholder="Leave blank to use saved contact" /><!-- oninput removed -->
+        </div>
+        <button class="btn mt12" data-action="submit-load">Post Load</button><!-- onclick removed -->
+    </div>
+</section>
+
+<!-- TRUCK / TRAILER SALES -->
+<section id="sales" class="section">
+    <div class="card">
+        <h2 style="margin:0 0 8px 0;font-size:1.05rem">Trucks & Sales Listings</h2>
+        <div class="row">
+            <div>
+                <label>Filter by Country</label>
+                <select id="salesFilterCountry"></select><!-- onchange removed -->
+            </div>
+            <div>
+                <label>Search</label>
+                <input id="salesFilterText" placeholder="Search title, city, details…" /><!-- oninput removed -->
+            </div>
+        </div>
+    </div>
+    <div id="salesList"></div>
+    <p id="emptySales" class="list-empty">No sales match your filters.</p>
+    <a id="postSaleAnchor"></a>
+    <div class="card mt12">
+        <h3 style="margin:0 0 8px 0;font-size:1rem">Post Trucks / Sales</h3>
+        <div class="row">
+            <div>
+                <label>Country</label>
+                <select id="saleCountry"></select><!-- onchange removed -->
+            </div>
+            <div>
+                <label>City</label>
+                <input id="saleCity" placeholder="e.g. Johannesburg" /><!-- oninput removed -->
+            </div>
+        </div>
+        <label>Title</label>
+        <input id="saleTitle" placeholder="e.g. Volvo FH 440 6x4" /><!-- oninput removed -->
+        <label>Details</label>
+        <textarea id="saleDetails" placeholder="e.g. 2017 model, 650k km, Manual transmission"></textarea><!-- oninput removed -->
+        <div class="row">
+    <div>
+        <label>Currency</label>
+        <select id="saleCurrency">
+            <option value="USD">US Dollar ($)</option>
+            <option value="ZAR">South African Rand (R)</option>
+            <option value="BWP">Botswana Pula (P)</option>
+            <option value="ZWL">Zimbabwe Dollar (ZWL$)</option>
+            <option value="ZMW">Zambian Kwacha (K)</option>
+            <option value="MWK">Malawian Kwacha (MK)</option>
+            <option value="TZS">Tanzanian Shilling (TSh)</option>
+            <option value="Other">Other (specify)</option>
+        </select>
+        <input id="saleCurrencyOther" placeholder="e.g. EUR, GBP, etc." style="display: none; margin-top: 8px;" />
+    </div>
+    <div>
+        <label>Price</label>
+        <input id="salePrice" type="number" min="0" step="1" placeholder="e.g. 45000" />
+    </div>
+</div>
+<div class="row">
+    <div>
+        <label>Images</label>
+        <input id="saleImage" type="file" accept="image/*" multiple />
+        <div class="file-hint">Upload up to 3 images.</div>
+    </div>
+</div>
+        <div class="row mt8">
+            <div>
+                <label>Contact (auto from My Account)</label>
+                <input id="saleContactOverride" placeholder="Leave blank to use saved contact" /><!-- oninput removed -->
+            </div>
+        <button class="btn mt12" data-action="submit-truck">Post Sale</button><!-- onclick removed -->
+    </div>
+</section>
+
+  <!-- MY ACCOUNT -->
+<section id="account" class="section">
+    <div class="card">
+        <h2 style="margin:0 0 8px 0;font-size:1.05rem">My Account</h2>
+        <div id="acctState"></div>  <!-- <-- keep this as is -->
+    </div>
+
+    <!-- INSERT THESE TWO ELEMENTS HERE -->
+    <div class="card mt12">
+        <h3 style="margin:0 0 8px 0;font-size:1rem">My Posts</h3>
+        <div id="myPosts"></div>
+        <p id="emptyMine" class="list-empty">You have not posted any loads or trucks yet.</p>
+    </div>
+    
+    <!-- In the account section, add this after the "My Posts" card -->
+<div class="card">
+    <h3 style="margin:0 0 8px 0;font-size:1rem">Help Improve <strong>AppLoads</strong></h3>
+    
+    <!-- Only show if signed in -->
+    <div id="feedbackSection" style="display: none;">
+        <p class="muted" style="margin-bottom: 12px;">
+            Your feedback helps us improve <strong>AppLoads</strong> for everyone.
+        </p>
+        <button class="btn secondary" onclick="showFeedbackForm()">
+            💬 Send Feedback
+        </button>
+    </div>
+    
+    <!-- Show if not signed in -->
+    <div id="feedbackSigninPrompt" style="display: none;">
+        <p class="muted" style="margin-bottom: 0;">
+            Sign in to provide feedback and help improve <strong>AppLoads</strong>.
+        </p>
+    </div>
+</div>
+
+     <div class="card">
+        <h3 style="margin:0 0 8px 0;font-size:1rem">Data</h3>
+        <p class="muted">Your data is stored securely in the cloud.</p>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" style="display: none;">
+        <div class="card">
+            <h3 style="margin:0 0 8px 0;font-size:1rem">Admin Dashboard</h3>
+            <div class="admin-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                <div class="stat-card" style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;">0</div>
+                    <div style="font-size: 12px; color: #666;">Total Loads</div>
+                </div>
+                <div class="stat-card" style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;">0</div>
+                    <div style="font-size: 12px; color: #666;">Total Sales</div>
+                </div>
+                <div class="stat-card" style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;">0</div>
+                    <div style="font-size: 12px; color: #666;">Active Users</div>
+                </div>
+                <div class="stat-card" style="background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;">0</div>
+                    <div style="font-size: 12px; color: #666;">Today's Posts</div>
+                </div>
+            </div>
+            
+            <div class="admin-actions" style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                <button class="btn small secondary" data-action="view-all-loads">View All Loads</button>
+                <button class="btn small secondary" data-action="view-all-sales">View All Sales</button>
+                <button class="btn small warning" data-action="clean-expired" style="background: #dc3545; color: white;">Clean Expired</button>
+            </div>
+            
+            <div id="adminContent">
+                <p class="muted" style="text-align: center;">Select an action above to begin</p>
+            </div>
+        </div>
+    </div>
+
+       <!-- VERSION NUMBER AT THE VERY BOTTOM -->
+    <p style="font-size:10px; color:gray; text-align:center; margin-top:20px;">
+        Build version: 2025-11-01.v0.2
+    </p>
+</section>
+    </div>
+
+    <!-- Bottom Tabs -->
+    <nav class="tabs">
+        <div class="tab active" data-target="home">
+            <div class="tab-icon">🏠</div>
+            <div>Home</div>
+        </div>
+        <div class="tab" data-target="loads">
+            <div class="tab-icon">📦</div>
+            <div>Loads</div>
+        </div>
+        <div class="tab" data-target="post">
+            <div class="tab-icon">➕</div>
+            <div>Post</div>
+        </div>
+        <div class="tab" data-target="sales">
+            <div class="tab-icon">🚛</div>
+            <div>Sales</div>
+        </div>
+        <div class="tab" data-target="account">
+            <div class="tab-icon">👤</div>
+            <div>Account</div>
+        </div>
+    </nav>
+
+    <!-- Contact Popup -->
+    <div id="popup">
+        <div class="box">
+            <div class="between">
+                <h3 style="margin:0">Contact</h3>
+                <button class="btn small secondary" data-action="close-popup">Close</button><!-- onclick removed -->
+            </div>
+            <div id="popupBody" class="mt10"></div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth">
+        <div class="box">
+            <div class="between">
+                <h3 style="margin:0">Sign in to Post</h3>
+                <button class="btn small secondary" data-action="close-auth">Close</button><!-- onclick removed -->
+            </div>
+            <div class="row mt10">
+                <button class="btn secondary" id="signinTabBtn" data-action="signin-tab">I have an account</button><!-- onclick removed -->
+                <button class="btn secondary" id="signupTabBtn" data-action="signup-tab">Create account</button><!-- onclick removed -->
+            </div>
+            <div id="authForms" class="mt12"></div>
+            <div class="mt12">
+                <button class="btn secondary" style="background:#fff;color:#000;border:1px solid #ddd" data-action="google-signin"> <!-- onclick removed -->
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px;margin-right:8px;vertical-align:middle" alt="">
+                    Sign in with Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+    
+    <!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <div class="loading-message">Loading...</div>
+        <div class="loading-progress" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-text">0%</div>
+        </div>
+        <button class="btn secondary small cancel-btn" style="display: none; margin-top: 12px;">Cancel</button>
+    </div>
+</div>
+
+    <!-- Currency Handler - Hides entire container -->
+<script>
+    function initFormHandlers() {
+        // Currency handler
+        const currencySelect = document.getElementById('currency');
+        const otherCurrencyContainer = document.getElementById('otherCurrencyContainer');
+        const otherCurrencyInput = document.getElementById('otherCurrency');
+        
+        if (currencySelect && otherCurrencyContainer) {
+            otherCurrencyContainer.style.display = 'none';
+            currencySelect.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    otherCurrencyContainer.style.display = 'block';
+                } else {
+                    otherCurrencyContainer.style.display = 'none';
+                    if (otherCurrencyInput) otherCurrencyInput.value = '';
+                }
+            });
+        }
+
+        // Origin Country handler
+        const originCountrySelect = document.getElementById('originCountry');
+        const originCountryOther = document.getElementById('originCountryOther');
+        if (originCountrySelect && originCountryOther) {
+            originCountryOther.style.display = 'none';
+            originCountrySelect.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    originCountryOther.style.display = 'block';
+                } else {
+                    originCountryOther.style.display = 'none';
+                    originCountryOther.value = '';
+                }
+            });
+        }
+
+        // Destination Country handler
+        const destCountrySelect = document.getElementById('destCountry');
+        const destCountryOther = document.getElementById('destCountryOther');
+        if (destCountrySelect && destCountryOther) {
+            destCountryOther.style.display = 'none';
+            destCountrySelect.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    destCountryOther.style.display = 'block';
+                } else {
+                    destCountryOther.style.display = 'none';
+                    destCountryOther.value = '';
+                }
+            });
+        }
+
+        // Payment Terms handler
+        const termsSelect = document.getElementById('terms');
+        const termsOther = document.getElementById('termsOther');
+        if (termsSelect && termsOther) {
+            termsOther.style.display = 'none';
+            termsSelect.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    termsOther.style.display = 'block';
+                } else {
+                    termsOther.style.display = 'none';
+                    termsOther.value = '';
+                }
+            });
+        }
+            // Sales Currency handler
+    const saleCurrencySelect = document.getElementById('saleCurrency');
+    const saleCurrencyOther = document.getElementById('saleCurrencyOther');
+    if (saleCurrencySelect && saleCurrencyOther) {
+        saleCurrencyOther.style.display = 'none';
+        saleCurrencySelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                saleCurrencyOther.style.display = 'block';
+            } else {
+                saleCurrencyOther.style.display = 'none';
+                saleCurrencyOther.value = '';
+            }
+        });
+    }
+} // ← This is the closing brace of initFormHandlers
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', initFormHandlers);
+    
+    // Re-initialize when navigating to Post section
+    const originalGoto = window.goto;
+    window.goto = function(id, scrollToId) {
+        if (originalGoto) originalGoto(id, scrollToId);
+        if (id === 'post') {
+            setTimeout(initFormHandlers, 100);
+        }
+    };
+</script>
+
+    <!-- Firebase-enabled main script (module) -->
+    <script type="module" src="js/main.js?v=0.2"></script>
+</body>
+</html>
