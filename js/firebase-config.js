@@ -7,7 +7,10 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 
 // --- Firestore (Database) ---
 import {
-  getFirestore, collection, doc, setDoc, getDoc, getDocs,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  collection, doc, setDoc, getDoc, getDocs,
   deleteDoc, query, orderBy, where, updateDoc, increment,
   serverTimestamp, limit, startAfter
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -33,7 +36,7 @@ import { getAnalytics, logEvent } from 'https://www.gstatic.com/firebasejs/10.7.
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVmRSQLBi2PESf1Tj43-t0x64lki-H0dU",
-  authDomain: "apploads-online.firebaseapp.com",
+  authDomain: "apploads-online.firebaseapp.com",  // ← CHANGE THIS LINE
   projectId: "apploads-online",
   storageBucket: "apploads-online.firebasestorage.app",
   messagingSenderId: "912753061359",
@@ -43,7 +46,23 @@ const firebaseConfig = {
 
 // Initialize core Firebase services
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
+
+// -----------------------------
+// Enable SDK IndexedDB persistence
+// -----------------------------
+// This enables Firestore's built-in offline persistence (reads from local cache,
+// queues writes while offline, and syncs automatically when online).
+//
+// Typical failures:
+// - 'failed-precondition' => multiple tabs open (persistence only active in one tab)
+// - 'unimplemented' => browser does not support required features
+// -----------------------------
+
 const auth = getAuth(app);
 const analytics = getAnalytics(app);
 

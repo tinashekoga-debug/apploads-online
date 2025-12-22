@@ -17,7 +17,7 @@ import { showToast, showLoading, hideLoading, setProgress } from './ui.js';
 // =========================
 // Image Compression
 // =========================
-export async function compressImage(file, maxWidth = 1200, maxHeight = 800, quality = 0.8) {
+export async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.85) {
     return new Promise((resolve, reject) => {
         // === ENHANCED VALIDATION ===
         if (!file) {
@@ -102,12 +102,35 @@ export async function compressImage(file, maxWidth = 1200, maxHeight = 800, qual
 // =========================
 let selectedImages = [];
 
-export function setupImagePreview() {
-    const fileInput = document.getElementById('saleImage');
-    const previewContainer = document.createElement('div');
-    previewContainer.id = 'imagePreview';
-    previewContainer.className = 'image-preview-container';
-    fileInput.parentNode.appendChild(previewContainer);
+let activeFileInputId = null;
+let activePreviewContainerId = null;
+
+export function setupImagePreview(inputId = null, previewId = null) {
+    const fileInput = inputId 
+        ? document.getElementById(inputId)
+        : (document.getElementById('saleImage') ||
+           document.getElementById('postImages') ||
+           document.getElementById('newPostImages'));
+    
+    // ✅ FIX: Check if fileInput exists and has a parentNode
+    if (!fileInput || !fileInput.parentNode) {
+        console.log('⚠️ saleImage input not found in DOM, skipping image preview setup');
+        return;
+    }
+    
+    // Use custom preview ID if provided, or create default
+    activeFileInputId = fileInput.id;
+activePreviewContainerId = previewId || 'imagePreview';
+
+const containerId = activePreviewContainerId;
+    let previewContainer = document.getElementById(containerId);
+    
+    if (!previewContainer) {
+        previewContainer = document.createElement('div');
+        previewContainer.id = containerId;
+        previewContainer.className = 'image-preview-container';
+        fileInput.parentNode.appendChild(previewContainer);
+    }
 
     fileInput.addEventListener('change', function(e) {
         const newFiles = Array.from(e.target.files);
@@ -150,8 +173,8 @@ export function setupImagePreview() {
         // === END VALIDATION ===
         
         // MOBILE GALLERY MULTI-SELECT: Replace selection with new batch
-        // But respect the 3-image limit
-        selectedImages = validFiles.slice(0, 3);
+        // But respect the 5-image limit
+        selectedImages = validFiles.slice(0, 5); // CHANGED: 3 to 5
         
         updateImagePreview();
         updateFileInput();
@@ -176,7 +199,12 @@ export function clearSelectedImages() {
 
 // Helper function to update the actual file input with selected files
 function updateFileInput() {
-    const fileInput = document.getElementById('saleImage');
+    if (!activeFileInputId) return;
+const fileInput = document.getElementById(activeFileInputId);
+    
+    // ✅ FIX: Check if fileInput exists
+    if (!fileInput) return;
+    
     const dataTransfer = new DataTransfer();
     
     selectedImages.forEach(file => {
@@ -187,7 +215,12 @@ function updateFileInput() {
 }
 
 function updateImagePreview() {
-    const previewContainer = document.getElementById('imagePreview');
+    if (!activePreviewContainerId) return;
+const previewContainer = document.getElementById(activePreviewContainerId);
+    
+    // ✅ FIX: Check if previewContainer exists
+    if (!previewContainer) return;
+    
     previewContainer.innerHTML = '';
 
     selectedImages.forEach((file, index) => {
@@ -257,22 +290,8 @@ export function createImageModal() {
         }
     });
     
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeImageModal();
-        }
-    });
-    
     return modal;
 }
-    
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeImageModal();
-        }
-    });
 
 // Global function to open image modal
 window.openImageModal = function(saleId, imageIndex) {
@@ -345,8 +364,8 @@ export async function handleImageUpload(files, onProgress = null, onCancel = nul
         throw new Error('No images to upload');
     }
     
-    if (files.length > 10) {
-        throw new Error('Too many images. Maximum 10 allowed.');
+    if (files.length > 5) { // CHANGED: 10 to 5 (matching our new limit)
+        throw new Error('Too many images. Maximum 5 allowed.');
     }
     // === END VALIDATION ===
     

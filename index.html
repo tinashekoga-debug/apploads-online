@@ -3,14 +3,23 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>AppLoads — SADC Load Board</title>
+    <title>AppLoads — SADC Loads & Trucks</title>
     <meta name="theme-color" content="#0b7d62" />
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/chat-ui.css">
     <link rel="manifest" href="/manifest.json">
+    <link rel="preload" href="icons.svg" as="fetch" crossorigin>
+    
+    <!-- ADD THIS SCRIPT FOR APP CHECK -->
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6Le9jAAsAAAAAN8ob5nh8pBeq7vLFhWw8s6fhg22"></script>
+    <script>
+        // Initialize reCAPTCHA for App Check
+        window.recaptchaSiteKey = '6Le9jAAsAAAAAN8ob5nh8pBeq7vLFhWw8s6fhg22';
+    </script>
 
-<!-- Theme Color -->
-<meta name="theme-color" content="#0b7d62">
-
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0b7d62">
+    <!-- ... rest of your head content ... -->
 <!-- Apple Touch Icons -->
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
@@ -30,27 +39,55 @@
 <!-- Favicon -->
 <link rel="icon" type="image/png" href="/icons/icon-32.png">
 <link rel="shortcut icon" href="/icons/icon-32.png">
+    
+   <style>
+    /* Hide entire app UI until JS is ready */
+    body.app-loading .wrap,
+    body.app-loading header,
+    body.app-loading nav,
+    body.app-loading #popup,
+    body.app-loading #auth,
+    body.app-loading #toast {
+        display: none !important;
+    }
+</style>
+    
+    <style>
+    /* Hide reCAPTCHA badge during app-loading state */
+    body.app-loading .grecaptcha-badge {
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+</style>
+    
 </head>
-<body>
-    <header>
-        <h1>🚛 AppLoads</h1>
-        <div class="sub">SADC • Loads • Trucks • Sales</div>
+<body class="app-loading">
+ <header>
+        <h1>AppLoads</h1>
+        <div class="sub">Loads • Trucks • Sales</div>
     </header>
     
     <div class="wrap">
         <!-- HOME -->
         <section id="home" class="section active">
-            <div class="card">
-                <div class="between">
-                    <h2 style="margin:0;font-size:1.05rem">Welcome to AppLoads</h2>
-                    <span class="badge">Open to Truckers • SADC</span>
-                </div>
-                <p class="muted"></p><!-- placeholder fór future Notíces -->
-                <div class="quick">
-                    <button class="btn secondary" data-action="browse-loads">📦 Browse Loads</button><!-- onclick removed -->
-                    <button class="btn secondary" data-action="browse-trucks">🚛 Browse Sales</button><!-- onclick removed -->
-                    <button class="btn secondary" data-action="post-load">➕ Post Load</button><!-- onclick removed -->
-                    <button class="btn secondary" data-action="post-truck">➕ Post Sale</button><!-- onclick removed -->
+            <div class="card">              
+    <div class="quick">
+                   <button class="btn secondary" data-action="browse-loads">
+    <svg class="icon" width="20" height="20"><use href="#icon-package"></use></svg>
+    Browse Loads
+</button>
+<button class="btn secondary" data-action="browse-trucks">
+    <svg class="icon" width="20" height="20"><use href="#icon-truck"></use></svg>
+    Browse Sales
+</button>
+<button class="btn secondary" data-action="post-load">
+    <svg class="icon" width="20" height="20"><use href="#icon-plus"></use></svg>
+    Post Load
+</button>
+<button class="btn secondary" data-action="open-post-modal">
+    <svg class="icon" width="20" height="20"><use href="#icon-plus"></use></svg>
+    Post Sale
+</button>
                 </div>
             </div>
             <div class="card">
@@ -69,13 +106,7 @@
         <!-- AVAILABLE LOADS -->
         <section id="loads" class="section">
             <div class="card">
-                <h2 style="margin:0 0 8px 0;font-size:1.05rem">Available Loads</h2>
-                <div class="filter-chips">
-                    <div class="filter-chip active" data-filter="all">All Loads</div>
-                    <div class="filter-chip" data-filter="popular">Most Popular</div>
-                    <div class="filter-chip" data-filter="recent">Recently Added</div>
-                </div>
-                <div class="row">
+                 <div class="row">
                     <div>
                         <label>Origin Country</label>
                         <select id="filterOrigin"></select><!-- onchange removed -->
@@ -85,10 +116,16 @@
                         <select id="filterDest"></select><!-- onchange removed -->
                     </div>
                 </div>
-                <div class="row mt8">
-                    <input id="filterText" placeholder="Search city, cargo, terms…" /><!-- oninput removed -->
-                    <button class="btn secondary" data-action="clear-filters">Clear Filters</button><!-- onclick removed -->
-                </div>
+              <div class="row mt8">
+    <div class="search-input-wrapper">
+        <input id="filterText" placeholder="Search city, cargo, terms…" />
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+        </svg>
+    </div>
+    <button class="btn secondary" data-action="clear-filters">Clear Filters</button><!-- onclick removed -->
+</div>
             </div>
             <div id="loadsList"></div>
             <p id="emptyLoads" class="list-empty">No loads match your filters.</p>
@@ -97,8 +134,7 @@
 <!-- POST LOAD -->
 <section id="post" class="section">
     <div class="card">
-        <h2 style="margin:0 0 8px 0;font-size:1.05rem">Post a Load</h2>
-<div class="row">
+       <div class="row">
     <div>
         <label>Origin Country</label>
         <select id="originCountry">
@@ -128,21 +164,22 @@
         <input id="destCity" placeholder="e.g. Durban, Lusaka" />
     </div>
 </div>
-        <label for="cargo">Cargo Details</label>
-        <input id="cargo" placeholder="e.g. 30t cement, 40ft container" /><!-- oninput removed -->
+        <label for="cargo">Truck and Cargo Details</label>
+        <input id="cargo" placeholder="Truck type & Cargo only" /><!-- oninput removed -->
         
-      <!-- NEW: Currency and Pricing Type -->
+<!-- NEW: Currency and Pricing Type -->
 <div class="row">
     <div>
         <label>Currency</label>
         <select id="currency">
-            <option value="USD">US Dollar ($)</option>
-            <option value="ZAR">South African Rand (R)</option>
-            <option value="BWP">Botswana Pula (P)</option>
-            <option value="ZWL">Zimbabwe Dollar (ZWL$)</option>
-            <option value="ZMW">Zambian Kwacha (K)</option>
-            <option value="MWK">Malawian Kwacha (MK)</option>
-            <option value="TZS">Tanzanian Shilling (TSh)</option>
+            <option value="USD">US Dollar (USD)</option>
+            <option value="ZAR">South African Rand (ZAR)</option>
+            <option value="BWP">Botswana Pula (BWP)</option>
+            <option value="ZWL">Zimbabwe Dollar (ZWL)</option>
+            <option value="NAD">Namibian Dollar (NAD)</option>
+            <option value="ZMW">Zambian Kwacha (ZMW)</option>
+            <option value="MWK">Malawian Kwacha (MWK)</option>
+            <option value="TZS">Tanzanian Shilling (TZS)</option>
             <option value="Other">Other (specify)</option>
         </select>
     </div>
@@ -179,6 +216,7 @@
     <option value="50/50">50% Upfront / 50% on Delivery</option>
     <option value="70/30">70/30</option>
     <option value="80/20">80/20</option>
+    <option value="3 Days">3 Days</option>
     <option value="7 Days">7 Days</option>
     <option value="14 Days">14 Days</option>
     <option value="30 Days">30 Days</option>
@@ -189,125 +227,121 @@
             <div>
                 <label>Ready Date</label>
                 <input id="ready" type="date" /><!-- oninput removed -->
-            </div>
-            <div>
-                <label>Contact (auto from My Account)</label>
-                <input id="contactOverride" placeholder="Leave blank to use saved contact" /><!-- oninput removed -->
-        </div>
-        <button class="btn mt12" data-action="submit-load">Post Load</button><!-- onclick removed -->
-    </div>
+            </div>          
+            
+      <!-- Contact override temporarily disabled to enforce profile-based contact integrity -->
+      
+            <!--
+<div>
+    <label>Contact (auto from My Account)</label>
+    <input id="contactOverride" placeholder="Leave blank to use saved contact" />
+</div>
+-->
+
+<!-- Edit mode buttons -->
+<div id="editLoadActions" class="mt12" style="display:none; gap:10px;">
+    <button class="btn secondary" style="flex:1;" data-action="cancel-edit-load">
+        Cancel
+    </button>
+
+    <button class="btn primary" style="flex:2;" data-action="submit-load">
+        Update Load
+    </button>
+</div>
+
+<!-- Normal post button -->
+<button id="postLoadBtn" class="btn mt12" data-action="submit-load">
+    Post Load
+</button>
+
+</div>
 </section>
 
-<!-- TRUCK / TRAILER SALES -->
+<!-- MARKETPLACE (FORMERLY TRUCKS / SALES) -->
 <section id="sales" class="section">
     <div class="card">
-        <h2 style="margin:0 0 8px 0;font-size:1.05rem">Trucks & Sales Listings</h2>
-        <div class="row">
-            <div>
-                <label>Filter by Country</label>
-                <select id="salesFilterCountry"></select><!-- onchange removed -->
-            </div>
-            <div>
-                <label>Search</label>
-                <input id="salesFilterText" placeholder="Search title, city, details…" /><!-- oninput removed -->
-            </div>
-        </div>
-    </div>
-    <div id="salesList"></div>
-    <p id="emptySales" class="list-empty">No sales match your filters.</p>
-    <a id="postSaleAnchor"></a>
-    <div class="card mt12">
-        <h3 style="margin:0 0 8px 0;font-size:1rem">Post Trucks / Sales</h3>
-        <div class="row">
-            <div>
-                <label>Country</label>
-                <select id="saleCountry"></select><!-- onchange removed -->
-            </div>
-            <div>
-                <label>City</label>
-                <input id="saleCity" placeholder="e.g. Johannesburg" /><!-- oninput removed -->
-            </div>
-        </div>
-        <label>Title</label>
-        <input id="saleTitle" placeholder="e.g. Volvo FH 440 6x4" /><!-- oninput removed -->
-        <label>Details</label>
-        <textarea id="saleDetails" placeholder="e.g. 2017 model, 650k km, Manual transmission"></textarea><!-- oninput removed -->
-        <div class="row">
-    <div>
-        <label>Currency</label>
-        <select id="saleCurrency">
-            <option value="USD">US Dollar ($)</option>
-            <option value="ZAR">South African Rand (R)</option>
-            <option value="BWP">Botswana Pula (P)</option>
-            <option value="ZWL">Zimbabwe Dollar (ZWL$)</option>
-            <option value="ZMW">Zambian Kwacha (K)</option>
-            <option value="MWK">Malawian Kwacha (MK)</option>
-            <option value="TZS">Tanzanian Shilling (TSh)</option>
-            <option value="Other">Other (specify)</option>
-        </select>
-        <input id="saleCurrencyOther" placeholder="e.g. EUR, GBP, etc." style="display: none; margin-top: 8px;" />
-    </div>
-    <div>
-        <label>Price</label>
-        <input id="salePrice" type="number" min="0" step="1" placeholder="e.g. 45000" />
+
+      <!-- REPLACE WITH (compact): -->
+<div class="row mt8">
+    <div class="search-input-wrapper">
+        <input id="salesFilterText" placeholder="Search Marketplace..." />
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+        </svg>
     </div>
 </div>
-<div class="row">
-    <div>
-        <label>Images</label>
-        <input id="saleImage" type="file" accept="image/*" multiple />
-        <div class="file-hint">Upload up to 3 images.</div>
-    </div>
+<div class="filter-row">
+    <button class="btn secondary" data-action="open-filter-drawer">
+    Filters <span id="activeFilterCount">(0)</span>
+</button>
+    <button class="btn secondary" data-action="clear-sale-filters">Clear Filters</button>
 </div>
-        <div class="row mt8">
-            <div>
-                <label>Contact (auto from My Account)</label>
-                <input id="saleContactOverride" placeholder="Leave blank to use saved contact" /><!-- oninput removed -->
-            </div>
-        <button class="btn mt12" data-action="submit-truck">Post Sale</button><!-- onclick removed -->
     </div>
+    
+    <!-- Marketplace Grid -->
+    <div id="salesList" class="marketplace-grid"></div>
+    
+    <p id="emptySales" class="list-empty">No items match your filters.</p>
 </section>
+
+<!-- FAB Button - Hidden by default -->
+<button class="fab" id="fabButton" data-action="open-post-modal" style="display: none;">+</button>
 
   <!-- MY ACCOUNT -->
 <section id="account" class="section">
     <div class="card">
-        <h2 style="margin:0 0 8px 0;font-size:1.05rem">My Account</h2>
         <div id="acctState"></div>  <!-- <-- keep this as is -->
     </div>
 
-    <!-- INSERT THESE TWO ELEMENTS HERE -->
+   <!-- My Posts Section -->
+<div id="myPostsContainer" style="display: none;">
     <div class="card mt12">
-        <h3 style="margin:0 0 8px 0;font-size:1rem">My Posts</h3>
-        <div id="myPosts"></div>
-        <p id="emptyMine" class="list-empty">You have not posted any loads or trucks yet.</p>
+       <!-- Page Indicator -->
+<div class="account-tabs-indicator">
+    <div class="indicator-dot active" data-index="0"></div>
+    <div class="indicator-dot" data-index="1"></div>
+    <div class="indicator-dot" data-index="2"></div>
+</div>
+
+<!-- Tabs -->
+<div class="account-tabs-scroll">
+    <button class="account-tab-btn-enhanced active" data-target="myMessagesSection">
+        Messages <span class="tab-count-badge unread" id="myMessagesCount" style="display: none;">0</span>
+    </button>
+    <button class="account-tab-btn-enhanced" data-target="myLoadsSection">
+        My Loads <span class="tab-count-badge" id="myLoadsCount">0</span>
+    </button>
+    <button class="account-tab-btn-enhanced" data-target="mySalesSection">
+        Marketplace <span class="tab-count-badge" id="mySalesCount">0</span>
+    </button>
+</div>
+        
+<div id="myPostsSlider" class="account-tab-slider">
+
+    <!-- Messages Section (NEW - FIRST) -->
+    <div id="myMessagesSection" class="account-tab-content">
+        <div id="messagesTabContent"></div>
     </div>
-    
-    <!-- In the account section, add this after the "My Posts" card -->
-<div class="card">
-    <h3 style="margin:0 0 8px 0;font-size:1rem">Help Improve <strong>AppLoads</strong></h3>
-    
-    <!-- Only show if signed in -->
-    <div id="feedbackSection" style="display: none;">
-        <p class="muted" style="margin-bottom: 12px;">
-            Your feedback helps us improve <strong>AppLoads</strong> for everyone.
+
+    <!-- Loads Section -->
+    <div id="myLoadsSection" class="account-tab-content">
+        <div id="myLoadsPosts"></div>
+        <p id="emptyMyLoads" class="list-empty">
+            You have not posted any loads yet.
         </p>
-        <button class="btn secondary" onclick="showFeedbackForm()">
-            💬 Send Feedback
-        </button>
     </div>
-    
-    <!-- Show if not signed in -->
-    <div id="feedbackSigninPrompt" style="display: none;">
-        <p class="muted" style="margin-bottom: 0;">
-            Sign in to provide feedback and help improve <strong>AppLoads</strong>.
+
+    <!-- Marketplace Section -->
+    <div id="mySalesSection" class="account-tab-content">
+        <div id="mySalesPosts"></div>
+        <p id="emptyMySales" class="list-empty">
+            You have not posted any marketplace listings yet.
         </p>
     </div>
 </div>
-
-     <div class="card">
-        <h3 style="margin:0 0 8px 0;font-size:1rem">Data</h3>
-        <p class="muted">Your data is stored securely in the cloud.</p>
     </div>
+</div>
 
     <!-- Admin Dashboard -->
     <div id="adminDashboard" style="display: none;">
@@ -335,56 +369,58 @@
             <div class="admin-actions" style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
                 <button class="btn small secondary" data-action="view-all-loads">View All Loads</button>
                 <button class="btn small secondary" data-action="view-all-sales">View All Sales</button>
-                <button class="btn small warning" data-action="clean-expired" style="background: #dc3545; color: white;">Clean Expired</button>
-            </div>
-            
-            <div id="adminContent">
-                <p class="muted" style="text-align: center;">Select an action above to begin</p>
             </div>
         </div>
     </div>
-
-       <!-- VERSION NUMBER AT THE VERY BOTTOM -->
-    <p style="font-size:10px; color:gray; text-align:center; margin-top:20px;">
-        Build version: 2025-11-01.v0.2
-    </p>
 </section>
     </div>
 
     <!-- Bottom Tabs -->
     <nav class="tabs">
-        <div class="tab active" data-target="home">
-            <div class="tab-icon">🏠</div>
-            <div>Home</div>
-        </div>
-        <div class="tab" data-target="loads">
-            <div class="tab-icon">📦</div>
-            <div>Loads</div>
-        </div>
-        <div class="tab" data-target="post">
-            <div class="tab-icon">➕</div>
-            <div>Post</div>
-        </div>
-        <div class="tab" data-target="sales">
-            <div class="tab-icon">🚛</div>
-            <div>Sales</div>
-        </div>
-        <div class="tab" data-target="account">
-            <div class="tab-icon">👤</div>
-            <div>Account</div>
-        </div>
+       <div class="tab active" data-target="home">
+    <div class="tab-icon">
+        <svg width="24" height="24"><use href="#icon-home"></use></svg>
+    </div>
+    <div>Home</div>
+</div>
+<div class="tab" data-target="loads">
+    <div class="tab-icon">
+        <svg width="24" height="24"><use href="#icon-package"></use></svg>
+    </div>
+    <div>Loads</div>
+</div>
+<div class="tab" data-target="post">
+    <div class="tab-icon">
+        <svg width="24" height="24"><use href="#icon-plus"></use></svg>
+    </div>
+    <div>Post</div>
+</div>
+<div class="tab" data-target="sales">
+    <div class="tab-icon">
+        <svg width="24" height="24"><use href="#icon-truck"></use></svg>
+    </div>
+    <div>Sales</div>
+</div>
+<div class="tab" data-target="account">
+    <div class="tab-icon">
+        <svg width="24" height="24"><use href="#icon-user"></use></svg>
+    </div>
+    <div>Account</div>
+</div>
     </nav>
 
-    <!-- Contact Popup -->
-    <div id="popup">
-        <div class="box">
-            <div class="between">
-                <h3 style="margin:0">Contact</h3>
-                <button class="btn small secondary" data-action="close-popup">Close</button><!-- onclick removed -->
-            </div>
-            <div id="popupBody" class="mt10"></div>
-        </div>
+  <!-- Contact Popup -->
+<div id="popup">
+    <div class="box">
+        <button class="modal-close" data-action="close-popup" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <div id="popupBody" class="mt10"></div>
     </div>
+</div>
 
     <!-- Auth Modal -->
     <div id="auth">
@@ -406,13 +442,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <span id="toastMessage"></span>
-    </div>
     
-    <!-- Loading Overlay -->
+        <!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner">
         <div class="spinner"></div>
@@ -518,9 +549,582 @@
             setTimeout(initFormHandlers, 100);
         }
     };
+        
 </script>
-
     <!-- Firebase-enabled main script (module) -->
-    <script type="module" src="js/main.js?v=0.2"></script>
-</body>
+    <script type="module" src="js/main.js?v=3.3"></script>
+           
+   <!-- Drawer Backdrop -->
+<div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+<!-- ========================= -->
+<!-- FILTER DRAWER             -->
+<!-- ========================= -->
+<div id="filter-drawer" class="bottom-sheet-drawer hidden">
+  <!-- Drag Handle - Replaces Header -->
+  <div class="drawer-drag-handle">
+    <div class="drag-handle-pill"></div>
+  </div>
+
+  <div class="drawer-content">
+    <!-- Location -->
+    <div class="filter-group">
+      <select id="filterCountry" class="minimal-select full-width" data-filter-name="country">
+        <option value="">All Countries</option>
+        <option value="Angola">Angola</option>
+        <option value="Botswana">Botswana</option>
+        <option value="DR Congo">DR Congo</option>
+        <option value="Eswatini">Eswatini</option>
+        <option value="Lesotho">Lesotho</option>
+        <option value="Malawi">Malawi</option>
+        <option value="Mozambique">Mozambique</option>
+        <option value="Namibia">Namibia</option>
+        <option value="South Africa">South Africa</option>
+        <option value="Tanzania">Tanzania</option>
+        <option value="Zambia">Zambia</option>
+        <option value="Zimbabwe">Zimbabwe</option>
+      </select>
+    </div>
+
+    <!-- Listing Type -->
+    <div class="filter-group">
+      <div class="row chip-select-group" id="listingTypeSelector" data-filter-name="listingType">
+        <button class="chip large active" data-filter-value="sales">Sales</button>
+        <button class="chip large" data-filter-value="services">Services</button>
+      </div>
+    </div>
+
+    <!-- Sales Sub-categories -->
+    <div class="filter-group sub-category-section" data-section-id="sales">
+      <div class="filter-section-header">Sales Categories</div>
+      <div class="unified-grid">
+        <button class="unified-category filter-chip multi-select" data-category="trucks">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-truck"></use></svg>
+          </div>
+          <div class="u-label">Trucks</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="parts">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-parts"></use></svg>
+          </div>
+          <div class="u-label">Parts</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="lubricants">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-oil"></use></svg>
+          </div>
+          <div class="u-label">Lubricants</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="tyres">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-tyre"></use></svg>
+          </div>
+          <div class="u-label">Tyres</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="accessories">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-accessories"></use></svg>
+          </div>
+          <div class="u-label">Accessories</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="other_sales">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-more"></use></svg>
+          </div>
+          <div class="u-label">Other Sales</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Services Sub-categories -->
+    <div class="filter-group sub-category-section hidden" data-section-id="services">
+      <div class="filter-section-header">Service Categories</div>
+      <div class="unified-grid">
+        <button class="unified-category filter-chip multi-select" data-category="tracking">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-tracking"></use></svg>
+          </div>
+          <div class="u-label">Tracking</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="repairs">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-repairs"></use></svg>
+          </div>
+          <div class="u-label">Repairs</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="insurance">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-insurance"></use></svg>
+          </div>
+          <div class="u-label">Insurance</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="customs">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-customs"></use></svg>
+          </div>
+          <div class="u-label">Customs</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="towing">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-towing"></use></svg>
+          </div>
+          <div class="u-label">Towing</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="transport_hire">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-transport-hire"></use></svg>
+          </div>
+          <div class="u-label">Transport Hire</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="escort">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-escort"></use></svg>
+          </div>
+          <div class="u-label">Escort</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="fuel_supplies">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-fuel"></use></svg>
+          </div>
+          <div class="u-label">Fuel Supplies</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="tyre_repairs">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-tyre-repairs"></use></svg>
+          </div>
+          <div class="u-label">Tyre Repairs</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="earthmoving">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-earthmoving"></use></svg>
+          </div>
+          <div class="u-label">Earthmoving</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="warehousing">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-warehousing"></use></svg>
+          </div>
+          <div class="u-label">Warehousing</div>
+        </button>
+        
+        <button class="unified-category filter-chip multi-select" data-category="other_services">
+          <div class="u-icon">
+            <svg width="24" height="24"><use href="#icon-services"></use></svg>
+          </div>
+          <div class="u-label">Other Services</div>
+        </button>
+      </div>
+    </div>
+  </div>
+    
+  <div class="drawer-footer sticky-bottom">
+    <button class="btn secondary" data-action="reset-filters">Reset</button>
+    <button class="btn primary" data-action="apply-filters">
+      View <span id="resultsCount"> (...)</span>
+    </button>
+  </div>
+</div>
+        
+        <!-- Full-Screen Marketplace Listing Overlay -->
+<div id="listingOverlay" class="listing-overlay hidden">
+    <div class="listing-container">
+        
+       <!-- Close Button -->
+<button class="listing-close-btn" id="listingCloseBtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M18 6L6 18M6 6l12 12"></path>
+    </svg>
+</button>
+
+        <!-- Image Carousel -->
+        <div class="listing-carousel">
+            <div class="carousel-track" id="carouselTrack"></div>
+            <div class="carousel-counter" id="carouselCounter"></div>
+            <button class="carousel-nav carousel-prev" id="carouselPrev">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+            </button>
+            <button class="carousel-nav carousel-next" id="carouselNext">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="listing-content">
+            <!-- Item Summary -->
+            <div class="listing-summary">
+                <div class="listing-price" id="listingPrice"></div>
+                <div class="listing-title" id="listingTitle"></div>
+                <div class="listing-meta" id="listingMeta"></div>
+            </div>
+     
+‎<!-- Contact Seller -->
+‎<div class="listing-section">
+‎    <div class="icon-action-bar">
+‎        <div class="icon-action-item">
+‎            <button class="icon-action-btn whatsapp-btn" id="whatsappBtn">
+‎                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+‎                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893c0-3.189-1.248-6.189-3.515-8.444"/>
+‎                </svg>
+‎            </button>
+‎            <div class="icon-action-label">WhatsApp</div>
+‎        </div>
+‎        <div class="icon-action-item">
+‎            <button class="icon-action-btn contact-info-btn" id="contactInfoBtn">
+‎                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+‎                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+‎                </svg>
+‎            </button>
+‎            <div class="icon-action-label">Contact</div>
+‎        </div>
+‎        <div class="icon-action-item">
+‎            <button class="icon-action-btn message-btn" id="messageBtn">
+‎                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+‎                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+‎                </svg>
+‎            </button>
+‎            <div class="icon-action-label">Message</div>
+‎        </div>
+‎        <div class="icon-action-item">
+‎            <button class="icon-action-btn report-btn" id="reportBtn">
+‎                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+‎                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+‎                </svg>
+‎            </button>
+‎            <div class="icon-action-label">Report</div>
+‎        </div>
+‎    </div>
+‎</div>
+
+               <!-- Description -->
+            <div class="listing-section">
+                <h3 class="section-title">Description</h3>
+                <div class="listing-description" id="listingDescription"></div>
+            </div>
+            
+            <!-- Related Listings -->
+            <div class="listing-section" id="relatedSection">
+                <h3 class="section-title">Related Listings</h3>
+                <div class="related-scroll" id="relatedScroll"></div>
+            </div>
+        </div>
+    </div>
+</div>
+        
+    <!-- NEW ISOLATED Posting Modal -->
+<div id="newPostModal" class="new-post-wrapper">
+    <div class="new-post-overlay"></div>
+    <div class="new-post-container">
+        <!-- Header -->
+        <div class="new-post-header">
+            <h3 class="new-post-title">Post to Marketplace</h3>
+            <button class="new-close-btn" data-action="close-post-modal">✕</button>
+        </div>
+        
+        <!-- Scrollable Body -->
+        <div class="new-post-body">
+            <!-- Step 1: Category Selection -->
+            <div id="newPostStep1" class="new-post-step active">
+                <div class="new-category-section">
+                    <h4 class="new-section-label">Post a Sale</h4>
+                    <div class="new-category-grid">
+                        <button type="button" class="new-category-card" data-type="sale" data-category="trucks">
+                            <svg width="24" height="24"><use href="#icon-truck"></use></svg>
+                            <span>Trucks</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="sale" data-category="parts">
+                            <svg width="24" height="24"><use href="#icon-parts"></use></svg>
+                            <span>Parts</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="sale" data-category="lubricants">
+                            <svg width="24" height="24"><use href="#icon-oil"></use></svg>
+                            <span>Lubricants</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="sale" data-category="tyres">
+                            <svg width="24" height="24"><use href="#icon-tyre"></use></svg>
+                            <span>Tyres</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="sale" data-category="accessories">
+                            <svg width="24" height="24"><use href="#icon-accessories"></use></svg>
+                            <span>Accessories</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="sale" data-category="other_sales">
+                            <svg width="24" height="24"><use href="#icon-more"></use></svg>
+                            <span>Other Sales</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="new-category-section">
+                    <h4 class="new-section-label">Post a Service</h4>
+                    <div class="new-category-grid">
+                        <button type="button" class="new-category-card" data-type="service" data-category="tracking">
+                            <svg width="24" height="24"><use href="#icon-tracking"></use></svg>
+                            <span>Tracking</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="repairs">
+                            <svg width="24" height="24"><use href="#icon-repairs"></use></svg>
+                            <span>Repairs</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="insurance">
+                            <svg width="24" height="24"><use href="#icon-insurance"></use></svg>
+                            <span>Insurance</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="customs">
+                            <svg width="24" height="24"><use href="#icon-customs"></use></svg>
+                            <span>Customs</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="towing">
+                            <svg width="24" height="24"><use href="#icon-towing"></use></svg>
+                            <span>Towing</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="transport_hire">
+                            <svg width="24" height="24"><use href="#icon-transport-hire"></use></svg>
+                            <span>Transport Hire</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="escort">
+                            <svg width="24" height="24"><use href="#icon-escort"></use></svg>
+                            <span>Escort</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="fuel_supplies">
+                            <svg width="24" height="24"><use href="#icon-fuel"></use></svg>
+                            <span>Fuel Supplies</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="tyre_repairs">
+                            <svg width="24" height="24"><use href="#icon-tyre-repairs"></use></svg>
+                            <span>Tyre Repairs</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="earthmoving">
+                            <svg width="24" height="24"><use href="#icon-earthmoving"></use></svg>
+                            <span>Earthmoving</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="warehousing">
+                            <svg width="24" height="24"><use href="#icon-warehousing"></use></svg>
+                            <span>Warehousing</span>
+                        </button>
+                        <button type="button" class="new-category-card" data-type="service" data-category="other_services">
+                            <svg width="24" height="24"><use href="#icon-services"></use></svg>
+                            <span>Other Services</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Form -->
+            <div id="newPostStep2" class="new-post-step">
+                <h4 id="newFormTitle" class="new-form-title">Post Details</h4>
+
+                <!-- Common Fields -->
+                <div class="new-field">
+                    <label class="new-label">Title</label>
+                    <input id="newPostTitle" class="new-input" placeholder="Enter title" />
+                </div>
+
+                <div class="new-row">
+                    <div class="new-field">
+                        <label class="new-label">Country</label>
+                        <select id="newPostCountry" class="new-input"></select>
+                    </div>
+                    <div class="new-field">
+                        <label class="new-label">City</label>
+                        <input id="newPostCity" class="new-input" placeholder="e.g., Johannesburg" />
+                    </div>
+                </div>
+
+                <!-- Sale-specific fields -->
+                <div id="newSaleFields" style="display:none;">
+                    <div class="new-row">
+                        <div class="new-field">
+                            <label class="new-label">Price</label>
+                            <input id="newPostPrice" type="number" class="new-input" placeholder="e.g., 250000" />
+                        </div>
+                        <div class="new-field">
+                            <label class="new-label">Currency</label>
+                            <select id="newPostCurrency" class="new-input">
+                                <option value="USD">USD</option>
+                                <option value="ZAR">ZAR</option>
+                                <option value="BWP">BWP</option>
+                                <option value="NAD">NAD</option>
+                                <option value="ZMW">ZMW</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="new-field">
+                        <label class="new-label">Description</label>
+                        <textarea id="newPostDescription" class="new-textarea" rows="4" placeholder="Condition, mileage, specs, year, extras"></textarea>
+                    </div>
+                </div>
+
+                <!-- Service-specific fields -->
+                <div id="newServiceFields" style="display:none;">
+                    <div class="new-field">
+                        <label class="new-label">Business / Company Name (Optional)</label>
+                        <input id="newPostBusinessName" class="new-input" placeholder="e.g., Roadmaster Truck Repairs" />
+                    </div>
+
+                    <div class="new-field">
+                        <label class="new-label">Services Offered</label>
+                        <textarea id="newPostServiceDesc" class="new-textarea" rows="5" placeholder="Describe what you do: towing, repairs, diagnostics, areas covered"></textarea>
+                    </div>
+
+                    <div class="new-row">
+                        <div class="new-field">
+                            <label class="new-label">Physical Address (Optional)</label>
+                            <input id="newPostServiceAddress" class="new-input" placeholder="e.g., 123 Industrial Rd" />
+                        </div>
+                        <div class="new-field">
+                            <label class="new-label">Operating Hours</label>
+                            <input id="newPostServiceHours" class="new-input" placeholder="e.g., Mon–Fri 08:00–17:00" />
+                        </div>
+                    </div>
+
+                    <div class="new-field">
+                        <label class="new-label">Areas / Coverage</label>
+                        <input id="newPostServiceAreas" class="new-input" placeholder="e.g., Namibia wide, Gauteng" />
+                    </div>
+                </div>
+
+                <!-- Shared: Images -->
+                <div class="new-field">
+                    <label class="new-label">Images (Max 5)</label>
+                    <input id="newPostImages" type="file" accept="image/*" multiple class="new-input" />
+                    <div id="newPostImagePreview" class="new-preview-grid"></div>
+                </div>
+
+                <!--
+Shared: Contact Override
+<div class="new-field">
+    <label class="new-label">Contact Info</label>
+
+    <input
+        id="newPostContactOverride"
+        class="new-input"
+        placeholder="Optional: override your account phone"
+    />
+</div>
+
+Contact override intentionally disabled to preserve platform integrity
+-->
+            </div>
+        </div>
+
+        <!-- Fixed Footer Buttons -->
+        <div class="new-post-footer" id="newFormActions" style="display:none;">
+            <button class="new-btn-secondary" data-action="post-prev-step">Back</button>
+            <button class="new-btn-primary" data-action="submit-post">Post to Marketplace</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Drawer -->
+<div id="settingsDrawer" class="drawer-overlay">
+    <div class="drawer-content">
+        <div class="modal-header">
+            <h3 style="margin:0">Settings</h3>
+            <button class="modal-close" data-action="close-settings">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="settings-section" style="margin-bottom: 24px;">
+                <h4 style="margin:0 0 12px 0; font-size: 1rem; font-weight: 600;">Account</h4>
+                <button class="settings-item" data-action="edit-profile">
+                    <span>Edit Profile</span>
+                </button>
+            </div>
+            
+            <div class="settings-section" style="margin-bottom: 24px;">
+                <h4 style="margin:0 0 12px 0; font-size: 1rem; font-weight: 600;">App</h4>
+                <button class="settings-item" data-action="refresh-app">
+                    <span>Refresh App</span>                    
+                </button>
+                <button class="settings-item" data-action="check-updates">
+                    <span>Check for Updates</span>                    
+                </button>
+            </div>
+            
+            <div class="settings-section" style="margin-bottom: 24px;">
+                <h4 style="margin:0 0 12px 0; font-size: 1rem; font-weight: 600;">Privacy & Data</h4>
+                <button class="settings-item" data-action="clear-cache">
+                    <span>Clear Cache</span>                 
+                </button>
+                    <button class="settings-item" data-action="data-policy">
+        <span>Data Control</span>
+    </button>
+                <button class="settings-item" data-action="delete-account">
+                    <span>Delete Account</span>                 
+                </button>
+            </div>
+            
+            <!-- In the Settings drawer, add these items before the Sign Out button section -->
+
+<!-- Add these in the Settings drawer's modal-body, before the last settings-section -->
+
+<div class="settings-section" style="margin-bottom: 24px;">
+    <h4 style="margin:0 0 12px 0; font-size: 1rem; font-weight: 600;">Help & Support</h4>
+    <button class="settings-item" data-action="send-feedback">
+        <span>Send Feedback</span>
+    </button>
+</div>
+            
+            <div class="settings-section">
+    <button class="btn warning" data-action="sign-out" style="width: 100%; margin-top: 8px;">
+        Sign Out
+    </button>
+
+    <div style="text-align:center; margin-top:12px;">
+        <span style="font-size:11px; color:#999;">
+            AppLoads v25.11.3.3
+        </span>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modern Confirm Dialog -->
+<div id="confirmModal" class="hidden">
+    <div class="confirm-dialog">
+        <div class="confirm-header">
+            <div class="confirm-icon" id="confirmIcon">
+                <!-- Icon will be injected by JS -->
+            </div>
+            <div class="confirm-text">
+                <h3 class="confirm-title" id="confirmTitle">Confirm Action</h3>
+                <p class="confirm-message" id="confirmMessage">Are you sure?</p>
+                <p class="confirm-description" id="confirmDescription" style="display: none;"></p>
+            </div>
+        </div>
+        <div class="confirm-actions">
+            <button class="btn secondary" id="cancelBtn">Cancel</button>
+            <button class="btn" id="confirmBtn">OK</button>
+        </div>
+    </div>
+</div>
+
+    </body>
 </html>

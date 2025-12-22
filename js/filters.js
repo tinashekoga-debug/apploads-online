@@ -1,13 +1,13 @@
 // ===========================================
 // filters.js
 // ===========================================
-// Handles all filtering functionality without circular dependencies
+// Handles all LOADS filtering functionality
 // ===========================================
 
 import { trackEvent } from './firebase-config.js';
 
 // =========================
-// Filter State Management
+// Filter State Management (LOADS ONLY)
 // =========================
 export const filterState = {
     loads: {
@@ -15,15 +15,11 @@ export const filterState = {
         destCountry: '',
         searchText: '',
         sortType: 'all'
-    },
-    sales: {
-        country: '',
-        searchText: ''
     }
 };
 
 // =========================
-// Filter Application Logic
+// Filter Application Logic (LOADS ONLY)
 // =========================
 export function applyLoadFilters(loads, countries, ownerRatingFor, ownerIdFromItem) {
     let filteredLoads = [...loads];
@@ -63,25 +59,8 @@ export function applyLoadFilters(loads, countries, ownerRatingFor, ownerIdFromIt
     return filteredLoads;
 }
 
-export function applySaleFilters(sales) {
-    let filteredSales = [...sales];
-    const state = filterState.sales;
-
-    if (state.country) {
-        filteredSales = filteredSales.filter(s => s.country === state.country);
-    }
-
-    if (state.searchText) {
-        filteredSales = filteredSales.filter(s => 
-            (s.title + " " + s.city + " " + s.details).toLowerCase().includes(state.searchText)
-        );
-    }
-
-    return filteredSales;
-}
-
 // =========================
-// Filter State Updates
+// Filter State Updates (LOADS ONLY)
 // =========================
 export function updateLoadFilterState(filterOriginEl, filterDestEl, filterText) {
     if (filterOriginEl) filterState.loads.originCountry = filterOriginEl.value;
@@ -89,13 +68,8 @@ export function updateLoadFilterState(filterOriginEl, filterDestEl, filterText) 
     if (filterText) filterState.loads.searchText = (filterText.value || '').toLowerCase();
 }
 
-export function updateSaleFilterState(salesFilterCountryEl, salesFilterText) {
-    if (salesFilterCountryEl) filterState.sales.country = salesFilterCountryEl.value;
-    if (salesFilterText) filterState.sales.searchText = (salesFilterText.value || '').toLowerCase();
-}
-
 // =========================
-// Filter Clearing
+// Filter Clearing (LOADS ONLY)
 // =========================
 export function clearLoadFilters(filterOriginEl, filterDestEl, filterText) {
     trackEvent('clear_filters', {
@@ -122,16 +96,27 @@ export function getFilterState() {
 }
 
 // =========================
-// Filter Setup Functions
+// Filter Setup Functions (LOADS ONLY)
 // =========================
 export function setupLoadFilters(renderLoadsCallback) {
+    console.log('[setupLoadFilters] running...');
     const filterOriginEl = document.getElementById('filterOrigin');
     const filterDestEl = document.getElementById('filterDest');
     const filterText = document.getElementById('filterText');
     const clearFiltersBtn = document.querySelector('[data-action="clear-filters"]');
 
+    console.log('[setupLoadFilters] Elements found:', {
+        filterOriginEl: !!filterOriginEl,
+        filterDestEl: !!filterDestEl,
+        filterText: !!filterText,
+        clearFiltersBtn: !!clearFiltersBtn
+    });
+
+    // attach input listeners only if element exists
     [filterOriginEl, filterDestEl, filterText].forEach(el => {
+        if (!el) return;
         el.addEventListener('input', () => {
+            console.log('[setupLoadFilters] filter input triggered');
             updateLoadFilterState(filterOriginEl, filterDestEl, filterText);
             renderLoadsCallback();
         });
@@ -139,6 +124,7 @@ export function setupLoadFilters(renderLoadsCallback) {
 
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
+            console.log('[setupLoadFilters] clear filters clicked');
             clearLoadFilters(filterOriginEl, filterDestEl, filterText);
             renderLoadsCallback();
         });
@@ -146,22 +132,11 @@ export function setupLoadFilters(renderLoadsCallback) {
 
     document.querySelectorAll('.filter-chip').forEach(chip => {
         chip.addEventListener('click', function() {
+            console.log('[setupLoadFilters] filter chip clicked', this.dataset.filter);
             document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
             filterState.loads.sortType = this.dataset.filter || 'all';
             renderLoadsCallback();
-        });
-    });
-}
-
-export function setupSaleFilters(renderSalesCallback) {
-    const salesFilterCountryEl = document.getElementById('salesFilterCountry');
-    const salesFilterText = document.getElementById('salesFilterText');
-
-    [salesFilterCountryEl, salesFilterText].forEach(el => {
-        el.addEventListener('input', () => {
-            updateSaleFilterState(salesFilterCountryEl, salesFilterText);
-            renderSalesCallback();
         });
     });
 }

@@ -106,14 +106,42 @@ export function switchAuth(mode) {
             e.preventDefault();
             doSignup();
         });
-        // Add password toggle functionality for signup
+        
+      // Add password toggle functionality for signup
 const toggleSignupPassword = document.getElementById('toggleSignupPassword');
 const signupPasswordInput = document.getElementById('a_pw');
+
 if (toggleSignupPassword && signupPasswordInput) {
-    toggleSignupPassword.addEventListener('click', function() {
-        const type = signupPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        signupPasswordInput.setAttribute('type', type);
-        this.textContent = type === 'password' ? '👁️' : '🙈';
+    // Ensure the field starts hidden
+    signupPasswordInput.type = "password";
+
+    // Default icon: eye-off (password hidden)
+    toggleSignupPassword.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+    `;
+
+    toggleSignupPassword.addEventListener('click', function () {
+        const isHidden = signupPasswordInput.type === "password";
+
+        signupPasswordInput.type = isHidden ? "text" : "password";
+
+        // If now visible -> show open eye; if now hidden -> show eye-off
+        this.innerHTML = isHidden
+            ? `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            `
+            : `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+            `;
     });
 }
     } else {
@@ -143,14 +171,40 @@ if (toggleSignupPassword && signupPasswordInput) {
             e.preventDefault();
             doSignin();
         });
-        // Add password toggle functionality
+       // Add password toggle functionality
 const togglePassword = document.getElementById('togglePassword');
 const passwordInput = document.getElementById('s_pw');
+
 if (togglePassword && passwordInput) {
-    togglePassword.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.textContent = type === 'password' ? '👁️' : '🙈';
+    // Ensure the field starts hidden
+    passwordInput.type = "password";
+
+    // Default icon: eye-off (password hidden)
+    togglePassword.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>
+    `;
+
+    togglePassword.addEventListener('click', function () {
+        const isHidden = passwordInput.type === "password";
+
+        passwordInput.type = isHidden ? "text" : "password";
+
+        this.innerHTML = isHidden
+            ? `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            `
+            : `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+            `;
     });
 }
 
@@ -249,7 +303,7 @@ showLoading('Creating account...');
             web: ''
         });
         
-     showToast('✅ Account created successfully', 'success');
+     showToast('Account created successfully', 'success');
 
 // Track successful signup
 trackEvent('signup', {
@@ -315,46 +369,48 @@ export async function doSignin() {
     }
     
     setButtonLoading('signinBtn', true);
-showLoading('Signing in...');
+    showLoading('Signing in...');
     
     try {
-        await signInWithEmailAndPassword(auth, email, pw);
- showToast('✅ Signed in successfully', 'success');
+        const userCredential = await signInWithEmailAndPassword(auth, email, pw);
+        const user = userCredential.user; // Define user here
+        
+        showToast('Signed in successfully', 'success');
 
-// Track successful signin
-trackEvent('signin', {
-    method: 'email',
-    user_id: user.uid,
-    timestamp: Date.now()
-});
+        // Track successful signin
+        trackEvent('signin', {
+            method: 'email',
+            user_id: user.uid,
+            timestamp: Date.now()
+        });
 
-authClose();
-// Navigate to account tab in read-only mode
-setTimeout(() => {
-    const box = document.getElementById('acctState');
-    box.dataset.editing = 'false';
-    goto('account');
-}, 500);
-} catch (e) {
-    console.error('Error signing in:', e);
-    setLoadingError('Sign in failed');
-    setButtonLoading('signinBtn', false);
-    
-    if (e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
-        showToast('Incorrect email or password', 'error');
-    } else if (e.code === 'auth/invalid-email') {
-        showToast('Invalid email address', 'error');
-    } else if (e.code === 'auth/too-many-requests') {
-        showToast('Too many failed attempts. Please try again later.', 'error');
-    } else if (e.code === 'auth/user-disabled') {
-        showToast('This account has been disabled', 'error');
-    } else {
-        showToast('Error signing in: ' + (e.message || 'Unknown error'), 'error');
+        authClose();
+        // Navigate to account tab in read-only mode
+        setTimeout(() => {
+            const box = document.getElementById('acctState');
+            box.dataset.editing = 'false';
+            goto('account');
+        }, 500);
+    } catch (e) {
+        console.error('Error signing in:', e);
+        setLoadingError('Sign in failed');
+        setButtonLoading('signinBtn', false);
+        
+        if (e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
+            showToast('Incorrect email or password', 'error');
+        } else if (e.code === 'auth/invalid-email') {
+            showToast('Invalid email address', 'error');
+        } else if (e.code === 'auth/too-many-requests') {
+            showToast('Too many failed attempts. Please try again later.', 'error');
+        } else if (e.code === 'auth/user-disabled') {
+            showToast('This account has been disabled', 'error');
+        } else {
+            showToast('Error signing in: ' + (e.message || 'Unknown error'), 'error');
+        }
+    } finally {
+        setButtonLoading('signinBtn', false);
+        hideLoading();
     }
-} finally {
-    setButtonLoading('signinBtn', false);
-    hideLoading();
-}
 }
 
 export async function doGoogleSignin() {
@@ -380,7 +436,7 @@ export async function doGoogleSignin() {
             });
         }
         
-   showToast('✅ Signed in with Google', 'success');
+   showToast('Signed in with Google', 'success');
 
 // Track successful Google signin
 trackEvent('signin', {
@@ -430,7 +486,7 @@ async function doForgotPassword() {
     
     try {
         await sendPasswordResetEmail(auth, email);
-showToast('✅ Password reset email sent! Check your inbox.', 'success');
+showToast('Password reset email sent! Check your inbox.', 'success');
 
 // Track successful password reset request
 trackEvent('password_reset_sent', {

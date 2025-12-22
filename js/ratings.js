@@ -68,9 +68,17 @@ export async function setVote(loadId, stars) {
         if (prev) {
             // User is changing their vote
             const delta = stars - prev;
-            await updateDoc(ratingRef, {
-                sum: increment(delta)
-            });
+            if (ratingDoc.exists()) {
+                await updateDoc(ratingRef, {
+                    sum: increment(delta)
+                });
+            } else {
+                // Should not happen, but handle gracefully
+                await setDoc(ratingRef, {
+                    sum: stars,
+                    count: 1
+                });
+            }
         } else {
             // New vote
             if (ratingDoc.exists()) {
@@ -94,37 +102,46 @@ export async function setVote(loadId, stars) {
         
         // Reload ratings
         const updatedRating = await getDoc(ratingRef);
-        state.loadRatings[loadId] = updatedRating.data();
+        if (updatedRating.exists()) {
+            state.loadRatings[loadId] = updatedRating.data();
+        }
         
-       // Recalculate owner aggregates
-calculateOwnerRatings();
+        // Recalculate owner aggregates
+        calculateOwnerRatings();
 
-// Track successful rating
-trackEvent('rate_load', {
-    load_id: loadId,
-    stars: stars,
-    previous_rating: prev || null,
-    user_id: state.currentUser.uid,
-    new_average: (updatedRating.sum / updatedRating.count).toFixed(1),
-    total_ratings: updatedRating.count
-});
+        // Track successful rating
+        trackEvent('rate_load', {
+            load_id: loadId,
+            stars: stars,
+            previous_rating: prev || null,
+            user_id: state.currentUser.uid,
+            new_average: updatedRating.exists() ? (updatedRating.data().sum / updatedRating.data().count).toFixed(1) : '0',
+            total_ratings: updatedRating.exists() ? updatedRating.data().count : 0
+        });
 
-showToast(`Thanks for your ${stars}-star rating!`, 'success');
-renderLoads();
-renderHome();
-} catch (e) {
-    console.error('Error saving rating:', e);
-    
-    // Track failed rating
-    trackEvent('rate_load', {
-        success: false,
-        load_id: loadId,
-        stars: stars,
-        error: e.message
-    });
-    
-    showToast('Error saving rating', 'error');
-}
+        showToast(`Thanks for your ${stars}-star rating!`, 'success');
+        
+        // Force UI updates
+        if (typeof renderLoads === 'function') renderLoads();
+        if (typeof renderHome === 'function') renderHome();
+        
+    } catch (e) {
+        console.error('Error saving rating:', e);
+        
+        // Track failed rating
+        trackEvent('rate_load', {
+            success: false,
+            load_id: loadId,
+            stars: stars,
+            error: e.message
+        });
+        
+        if (e.code === 'permission-denied') {
+            showToast('Permission denied. Please ensure you are signed in.', 'error');
+        } else {
+            showToast('Error saving rating: ' + (e.message || 'Unknown error'), 'error');
+        }
+    }
 }
 
 export function myVote(loadId) {
@@ -144,6 +161,15 @@ export function calculateOwnerRatings() {
             state.ownerRatings[ownerId].count += loadRating.count;
         }
     });
+    
+    console.log('🔄 Owner ratings recalculated:', Object.keys(state.ownerRatings).length);
+}
+
+// Initialize ratings when data loads
+export function initializeRatings(loadRatingsData) {
+    state.loadRatings = loadRatingsData || {};
+    calculateOwnerRatings();
+    console.log('⭐ Ratings initialized:', Object.keys(state.loadRatings).length);
 }
 
 // Build a star bar (interactive)
@@ -161,29 +187,29 @@ export function buildStarBar(loadId, initial) {
         wrap.appendChild(s);
         stars.push(s);
         
-  s.addEventListener('mouseenter', () => {
-    // Track star hover (pre-rating interaction)
-    trackEvent('star_hover', {
-        load_id: loadId,
-        hovered_stars: i,
-        current_rating: current || 0
-    });
-    fill(i);
-});
-s.addEventListener('mouseleave', () => fill(current || 0));
-s.addEventListener('click', () => {
-    current = i;
-    
-    // Track star click (before setting vote)
-    trackEvent('star_click', {
-        load_id: loadId,
-        selected_stars: i,
-        previous_rating: current || 0
-    });
-    
-    setVote(loadId, i);
-    fill(current);
-});
+        s.addEventListener('mouseenter', () => {
+            // Track star hover (pre-rating interaction)
+            trackEvent('star_hover', {
+                load_id: loadId,
+                hovered_stars: i,
+                current_rating: current || 0
+            });
+            fill(i);
+        });
+        s.addEventListener('mouseleave', () => fill(current || 0));
+        s.addEventListener('click', () => {
+            current = i;
+            
+            // Track star click (before setting vote)
+            trackEvent('star_click', {
+                load_id: loadId,
+                selected_stars: i,
+                previous_rating: current || 0
+            });
+            
+            setVote(loadId, i);
+            fill(current);
+        });
     }
 
     let current = initial || 0;
@@ -197,3 +223,10 @@ s.addEventListener('click', () => {
     return wrap;
 }
 
+// =========================
+// Global exports for module compatibility
+// =========================
+window.initializeRatings = initializeRatings;
+window.calculateOwnerRatings = calculateOwnerRatings;
+window.loadRatingFor = loadRatingFor;
+window.ownerRatingFor = ownerRatingFor;

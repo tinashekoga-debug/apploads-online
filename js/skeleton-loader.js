@@ -33,6 +33,19 @@ export const skeletonLoader = {
             </div>
         `).join('');
     },
+    
+    createMarketplaceSkeleton(count) {
+    return Array(count).fill(0).map(() => `
+        <div class="marketplace-item skeleton-item">
+            <div class="skeleton-image" style="height: 140px; border-radius: 0;"></div>
+            <div class="marketplace-details">
+                <div class="skeleton-line" style="width: 60%; height: 20px; margin-bottom: 8px;"></div>
+                <div class="skeleton-line" style="width: 90%; height: 16px; margin-bottom: 4px;"></div>
+                <div class="skeleton-line" style="width: 70%; height: 14px;"></div>
+            </div>
+        </div>
+    `).join('');
+},
 
     createHomeSkeleton: () => {
         return `
