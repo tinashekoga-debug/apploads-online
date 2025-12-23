@@ -14,19 +14,6 @@ export function setupAccountTabs() {
 
     tabBtns.forEach((btn, idx) => {
         btn.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-
-            // Remove active class from all buttons
-            document.querySelectorAll('.account-tab-btn-enhanced').forEach(b => b.classList.remove('active'));
-
-            // Add active class to clicked button
-            this.classList.add('active');
-
-            // Update indicator dots
-            document.querySelectorAll('.indicator-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === idx);
-            });
-
             // Sync slider animation
             const slider = document.getElementById('myPostsSlider');
             if (slider) {
@@ -34,6 +21,9 @@ export function setupAccountTabs() {
                 slider.style.transform = `translateX(${transforms[idx]})`;
                 if (container) container.dataset.currentIndex = String(idx);
             }
+            
+            // Update active button and tab visibility
+            syncActiveButton(idx);
         });
     });
 }
@@ -52,18 +42,37 @@ export function enableSwipeTabs() {
     let currentIndex = 0; // 0 = messages, 1 = loads, 2 = sales
     let isSwiping = false;
     let isVerticalScroll = false;
-
+    
     function syncActiveButton(index) {
-        document.querySelectorAll('.account-tab-btn-enhanced').forEach((b) => b.classList.remove('active'));
-        const targets = ['myMessagesSection', 'myLoadsSection', 'mySalesSection'];
-        const btn = document.querySelector(`.account-tab-btn-enhanced[data-target="${targets[index]}"]`);
-        if (btn) btn.classList.add('active');
-        
-        // Update indicator dots
-        document.querySelectorAll('.indicator-dot').forEach((dot, i) => {
-            dot.classList.toggle('active', i === index);
-        });
+    document.querySelectorAll('.account-tab-btn-enhanced').forEach((b) => b.classList.remove('active'));
+    const targets = ['myMessagesSection', 'myLoadsSection', 'mySalesSection'];
+    const btn = document.querySelector(`.account-tab-btn-enhanced[data-target="${targets[index]}"]`);
+    if (btn) btn.classList.add('active');
+    
+    // Update indicator dots - always show which section we're on
+    document.querySelectorAll('.indicator-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+    });
+    
+    // Update tab visibility based on current section
+    const allTabs = document.querySelectorAll('.account-tab-btn-enhanced');
+    if (index === 0) {
+        // Messages section: show Messages + My Loads
+        allTabs[0].style.display = '';  // Messages
+        allTabs[1].style.display = '';  // My Loads
+        allTabs[2].style.display = 'none';  // Marketplace hidden
+    } else if (index === 1) {
+        // My Loads section: show Messages + My Loads
+        allTabs[0].style.display = '';  // Messages
+        allTabs[1].style.display = '';  // My Loads
+        allTabs[2].style.display = 'none';  // Marketplace hidden
+    } else if (index === 2) {
+        // Marketplace section: show My Loads + Marketplace
+        allTabs[0].style.display = 'none';  // Messages hidden
+        allTabs[1].style.display = '';  // My Loads
+        allTabs[2].style.display = '';  // Marketplace
     }
+}
 
     container.addEventListener('touchstart', (e) => {
         if (popoverOpen) return;

@@ -394,18 +394,13 @@
 /* =========================
    Account Tabs with Page Indicator
    ========================= */
-.account-tabs-container {
-    position: relative;
-    margin-bottom: 0;
-}
-
+/* Compact floating tabs - outside card container */
 .account-tabs-indicator {
     display: flex;
     justify-content: center;
     gap: 6px;
-    padding: 8px 0;
-    background: #f8fafc;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 6px 0;
+    background: transparent;
 }
 
 .indicator-dot {
@@ -429,6 +424,7 @@
     padding: 0 16px;
     background: white;
     border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 12px;
 }
 
 .account-tabs-scroll::-webkit-scrollbar {
@@ -436,10 +432,10 @@
 }
 
 .account-tab-btn-enhanced {
-    padding: 14px 16px;
+    padding: 10px 16px;
     background: none;
     border: none;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: #64748b;
     white-space: nowrap;
@@ -463,15 +459,15 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 2px;
     background: #0b7d62;
-    border-radius: 3px 3px 0 0;
+    border-radius: 2px 2px 0 0;
 }
 
 .tab-count-badge {
     background: #0b7d62;
     color: white;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 10px;
