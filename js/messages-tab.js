@@ -10,6 +10,7 @@ import { getUserConversations } from './conversation-model.js';
 import { openChatScreen } from './chat-controller.js';
 import { escapeHtml, showToast, getTimeAgo } from './ui.js';
 import { updateUnreadBadge } from './chat-controller.js';
+import { afiUI } from './ai-ui.js'; // ✅ ADD THIS IMPORT
 
 // =========================
 // Render Messages Tab
@@ -103,14 +104,18 @@ async function getLoadData(loadId) {
 // Render Conversations List
 // =========================
 function renderConversationsList(conversations) {
+    // ✅ ADD AFI CARD AT THE TOP (using real afiUI component)
+    let html = afiUI.renderAssistantCard();
+    
     if (conversations.length === 0) {
-        return `
+        html += `
             <div class="empty-conversations">
                 <div class="empty-conversations-icon">💬</div>
                 <h3>No messages yet</h3>
                 <p>Message load owners from load cards to start a conversation</p>
             </div>
         `;
+        return html;
     }
     
     // Group by date
@@ -136,16 +141,8 @@ function renderConversationsList(conversations) {
         return acc;
     }, {});
     
-    // Render with AI assistant at top
-    return `
-        <div class="afi-assistant-card" id="afiAssistant">
-            <div class="afi-avatar">A</div>
-            <div class="afi-content">
-                <div class="afi-name">Afi <span class="afi-badge">AI</span></div>
-                <div class="afi-description">Your logistics assistant. Coming soon!</div>
-            </div>
-        </div>
-        
+    // Add conversations list
+    html += `
         <div class="conversations-list">
             ${Object.entries(grouped).map(([label, convs]) => `
                 <div class="conversation-group">
@@ -155,6 +152,8 @@ function renderConversationsList(conversations) {
             `).join('')}
         </div>
     `;
+    
+    return html;
 }
 
 // =========================
@@ -220,14 +219,8 @@ function setupConversationListeners() {
         });
     });
     
-    // AI Assistant
-    const afiCard = document.getElementById('afiAssistant');
-    if (afiCard) {
-        afiCard.addEventListener('click', function() {
-            showToast('Afi is coming soon!', 'info');
-            // Future: Open AI assistant interface
-        });
-    }
+    // ✅ REMOVE THE OLD AFI LISTENER - it's now handled by ai-integration.js
+    // The data-action="open-afi-chat" in the card will be handled globally
 }
 
 // =========================
@@ -256,4 +249,3 @@ export function initializeMessagesTab() {
     // This will be called when the Account section is rendered
     // The actual rendering happens when the tab is activated
 }
-

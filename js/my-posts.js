@@ -50,10 +50,10 @@ export function renderMine() {
     if (loadsCount) loadsCount.textContent = myLoads.length;
     if (salesCount) salesCount.textContent = mySales.length;
     
-    // Render all three sections
-renderMessagesTab();  // NEW - Render messages first
-renderMyLoads(myLoads);
-renderMySales(mySales);
+    // Render all three sections (Messages first - includes Afi)
+    renderMessagesTab();  // ✅ This will show Afi card at the top
+    renderMyLoads(myLoads);
+    renderMySales(mySales);
     
     // Initialize features (order matters!)
     // Small delay to ensure DOM is ready
