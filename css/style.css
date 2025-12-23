@@ -4195,12 +4195,19 @@ input:checked + .toggle-slider:before {
     display: block !important;
 }
 
-/* Fix: myPostsSlider must behave like p-tab-slider */
+/* Slider contains 3 sections, each taking 33.33% */
 #myPostsSlider {
     display: flex;
-    width: 200%;
+    width: 300%;
     transition: transform 0.35s ease-in-out;
     will-change: transform;
+}
+
+/* Each section takes exactly 1/3 of the slider width */
+#myPostsSlider .account-tab-content {
+    width: 33.33%;
+    flex-shrink: 0;
+    display: block !important;
 }
 
 /* ============================
