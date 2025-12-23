@@ -45,33 +45,29 @@ export class AfiUI {
         this.isThinking = false;
     }
     
-    // ===========================================
-    // RENDER: Afi assistant card for Messages tab
-    // ===========================================
-    // Uses existing .afi-assistant-card CSS class
-    renderAssistantCard() {
-        const hasKey = hasApiKey();
-        const statusText = hasKey ? '✅ Available' : '⚙️ Setup Required';
-        
-        return `
-            <div class="afi-assistant-card" data-action="open-afi-chat">
-                <div class="afi-avatar">
-                    <div style="color: white; font-weight: 700; font-size: 20px;">A</div>
+// ===========================================
+// RENDER: Afi assistant card for Messages tab
+// ===========================================
+renderAssistantCard() {
+    return `
+        <div class="afi-assistant-card" data-action="open-afi-chat">
+            <div class="afi-avatar">
+                <div style="color: white; font-weight: 700; font-size: 20px;">A</div>
+            </div>
+            <div class="afi-content">
+                <div class="afi-name">
+                    Afi <span class="afi-badge">AI</span>
                 </div>
-                <div class="afi-content">
-                    <div class="afi-name">
-                        Afi <span class="afi-badge">AI</span>
-                    </div>
-                    <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">
-                        ${statusText}
-                    </div>
-                    <div class="afi-description">
-                        Ask about SADC routes, pricing, documents & logistics
-                    </div>
+                <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">
+                    ✅ Always Available
+                </div>
+                <div class="afi-description">
+                    Ask about SADC routes, pricing, documents & logistics
                 </div>
             </div>
-        `;
-    }
+        </div>
+    `;
+}
     
     // ===========================================
     // RENDER: Full chat interface overlay
@@ -131,22 +127,16 @@ export class AfiUI {
         `;
     }
     
-    // ===========================================
-    // METHOD: Open chat window
-    // ===========================================
-    openChat() {
-        // Check if API key exists
-        if (!hasApiKey()) {
-            showToast('⚙️ Please set up your HuggingFace API key first', 'warning');
-            return;
-        }
-        
-        if (this.isOpen) return;
-        
-        this.isOpen = true;
-        document.body.insertAdjacentHTML('beforeend', this.renderChatInterface());
-        this.setupChatListeners();
-    }
+// ===========================================
+// METHOD: Open chat window
+// ===========================================
+openChat() {
+    if (this.isOpen) return;
+    
+    this.isOpen = true;
+    document.body.insertAdjacentHTML('beforeend', this.renderChatInterface());
+    this.setupChatListeners();
+}
     
     // ===========================================
     // METHOD: Setup event listeners for chat

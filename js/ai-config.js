@@ -1,23 +1,16 @@
-// ===========================================
-// ai-config.js - AI Configuration
-// ===========================================
-
 export const AI_CONFIG = {
     HUGGINGFACE_API_URL: 'https://api-inference.huggingface.co/models',
-    DEFAULT_MODEL: 'microsoft/DialoGPT-small',
-    MAX_TOKENS: 150,
-    TEMPERATURE: 0.7
+    DEFAULT_MODEL: 'Qwen/Qwen3-8B-Instruct', // ⬅️ LATEST & BEST
+    MAX_TOKENS: 1024, // ⬅️ Can go higher now!
+export const HF_TOKEN = null;    TEMPERATURE: 0.7
 };
 
-export function getApiKey() {
-    return localStorage.getItem('huggingface_api_key') || '';
-}
+const CENTRALIZED_API_KEY';
 
-export function setApiKey(key) {
-    localStorage.setItem('huggingface_api_key', key);
+export function getApiKey() {
+    return CENTRALIZED_API_KEY;
 }
 
 export function hasApiKey() {
-    return !!getApiKey();
+    return !!CENTRALIZED_API_KEY && CENTRALIZED_API_KEY !== 'hf_YOUR_API_KEY_HERE';
 }
-

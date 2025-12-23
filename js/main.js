@@ -148,6 +148,9 @@ export const state = {
     countries: countries // ADD THIS LINE
 };
 
+// ✅ ADD THIS - Expose state to window for AI context
+window.appState = state;
+
 // =========================
 // PAGINATION STATE
 // =========================
