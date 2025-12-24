@@ -49,7 +49,6 @@ import {
 
 // 3. DATA LOADER
 import { DataLoader } from './data-loader.js';
-import { setupAfiAI } from './ai-integration.js';
 
 // 4. EXTERNAL SERVICES LAST (Slow - network dependencies)
 import { trackEvent } from './firebase-config.js';
@@ -147,9 +146,6 @@ export const state = {
     isInitialLoad: true,
     countries: countries // ADD THIS LINE
 };
-
-// ✅ ADD THIS - Expose state to window for AI context
-window.appState = state;
 
 // =========================
 // PAGINATION STATE
@@ -460,7 +456,6 @@ if (filterCountryEl) {
   initializeSettingsDrawer(); // ADD THIS LINE
     // Add to initialization section (after auth initialization):
 initializeDataFramework();
-  setupAfiAI()
   setupReportFunctionality();
     setupMarketplaceReporting();
     
