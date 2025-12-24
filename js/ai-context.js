@@ -31,6 +31,12 @@ export function buildContext(userMessage) {
     contextParts.push(`You help with: route planning, price estimates, border documents, and general logistics advice.`);
     contextParts.push(`Keep responses concise, practical, and specific to SADC trucking.`);
     
+    contextParts.push(`
+If the question lacks sufficient data:
+- Ask ONE clarifying question
+- Do not guess prices or regulations
+`);
+    
     // 2. APP STATE CONTEXT
     contextParts.push(`\nCurrent Platform Status:`);
     contextParts.push(`- Active loads: ${state.loads?.length || 0}`);
@@ -50,8 +56,9 @@ export function buildContext(userMessage) {
     
     if (queryType === 'route') {
         contextParts.push(getRouteContext());
-    } else if (queryType === 'price') {
-        contextParts.push(getPriceContext(state));
+if (queryType === 'price') {
+    contextParts.push(getPriceContext(state).slice(0, 800));
+}
     } else if (queryType === 'documents') {
         contextParts.push(getDocumentContext());
     } else if (queryType === 'loads') {
@@ -66,7 +73,32 @@ export function buildContext(userMessage) {
         }
     }
     
-    return contextParts.join('\n');
+   return `
+SYSTEM:
+You are Afi, an AI logistics assistant for AppLoads operating in Southern Africa (SADC).
+
+BEHAVIOR RULES:
+- Be practical and industry-focused
+- Avoid generic advice
+- Prefer bullet points and numbers
+- Use Southern African trucking realities
+- If unsure, say so clearly
+
+CONTEXT:
+${contextParts.join('\n')}
+
+USER QUESTION:
+${userMessage}
+
+RESPONSE FORMAT:
+- Short intro (1–2 lines)
+- Bullet points or numbered steps
+- Use USD unless otherwise stated
+- No emojis
+- No disclaimers
+
+ANSWER:
+`.trim();
 }
 
 // ===========================================
