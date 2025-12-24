@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Afi Function</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button { 
+            padding: 15px 25px;
+            font-size: 16px;
+            margin: 10px 5px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:active {
+            background: #0056b3;
+        }
+        #output { 
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .loading {
+            color: #007bff;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Test Afi Function</h1>
+    <p>Click buttons to test different parts of the system:</p>
+    
+    <button onclick="testDirect()">1. Test Function Directly</button>
+    <button onclick="testAfiChat()">2. Test Full Afi Chat</button>
+    <button onclick="clearOutput()">Clear Output</button>
+    
+    <div id="output">Ready to test...</div>
+
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        function log(msg, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'loading' ? 'loading' : '';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${msg}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        window.clearOutput = function() {
+            output.textContent = 'Output cleared.\n';
+        };
+        
+        // Test 1: Direct function call
+        window.testDirect = async function() {
+            log('=== TEST 1: Direct Function Call ===');
+            log('Calling /.netlify/functions/huggingface...', 'loading');
+            
+            try {
+                const testPayload = {
+                    model: 'Qwen/Qwen2.5-Coder-32B-Instruct',
+                    inputs: '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\nSay hello in one sentence<|im_end|>\n<|im_start|>assistant\n',
+                    parameters: {
+                        max_new_tokens: 50,
+                        temperature: 0.7,
+                        return_full_text: false,
+                        do_sample: true,
+                        top_p: 0.95
+                    }
+                };
+                
+                log(`Payload: ${JSON.stringify(testPayload, null, 2)}`);
+                
+                const response = await fetch('/.netlify/functions/huggingface', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testPayload)
+                });
+                
+                log(`Response Status: ${response.status} ${response.statusText}`);
+                log(`Response Headers: ${JSON.stringify([...response.headers.entries()])}`);
+                
+                const text = await response.text();
+                log(`Raw Response Body:\n${text}`);
+                
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(text);
+                        log(`Parsed Response: ${JSON.stringify(data, null, 2)}`);
+                        log('✅ TEST 1 PASSED', 'success');
+                    } catch (e) {
+                        log(`❌ Could not parse JSON: ${e.message}`, 'error');
+                    }
+                } else {
+                    log(`❌ TEST 1 FAILED: ${response.status}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ TEST 1 ERROR: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`);
+            }
+        };
+        
+        // Test 2: Full Afi chat
+        window.testAfiChat = async function() {
+            log('\n=== TEST 2: Full Afi Chat ===');
+            log('Loading Afi modules...', 'loading');
+            
+            try {
+                const { afi } = await import('./js/ai-core.js');
+                log('✅ Afi module loaded');
+                
+                log('Sending test message...', 'loading');
+                const response = await afi.chat('Hello, can you introduce yourself?');
+                
+                log(`✅ Afi Response:\n"${response}"`, 'success');
+                log('✅ TEST 2 PASSED', 'success');
+                
+            } catch (error) {
+                log(`❌ TEST 2 ERROR: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`);
+            }
+        };
+        
+        log('Test page ready. Click a button above to start testing.');
+    </script>
+</body>
+</html>
