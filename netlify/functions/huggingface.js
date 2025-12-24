@@ -20,8 +20,9 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // ✅ UPDATED URL - use router.huggingface.co instead
     const response = await fetch(
-      `https://api-inference.huggingface.co/models/${model}`,
+      `https://router.huggingface.co/models/${model}`,
       {
         method: 'POST',
         headers: {
@@ -46,8 +47,14 @@ exports.handler = async (event, context) => {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      })
     };
   }
 };
-
