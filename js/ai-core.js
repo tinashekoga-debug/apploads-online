@@ -13,10 +13,6 @@ class AfiAssistant {
     async chat(message) {
     const apiKey = getApiKey();
     
-    if (!apiKey || apiKey === 'hf_YOUR_API_KEY_HERE') {
-        return "Afi AI is not configured yet. Please contact support.";
-    }
-    
     try {
         // Add user message to history
         this.conversationHistory.push({
@@ -24,7 +20,7 @@ class AfiAssistant {
             content: message
         });
         
-        // Keep only last 6 messages (3 exchanges) - can keep more with 128K!
+        // Keep only last 6 messages (3 exchanges)
         if (this.conversationHistory.length > 6) {
             this.conversationHistory = this.conversationHistory.slice(-6);
         }
@@ -34,7 +30,7 @@ class AfiAssistant {
         
         // Build conversation text for Qwen3
         const conversationText = this.conversationHistory
-            .slice(0, -1) // Don't include the message we just added
+            .slice(0, -1)
             .map(msg => `<|im_start|>${msg.role === 'user' ? 'user' : 'assistant'}\n${msg.content}<|im_end|>`)
             .join('\n');
         
@@ -48,27 +44,24 @@ ${message}<|im_end|>
 <|im_start|>assistant
 `;
         
-        // Call HuggingFace API
-        const response = await fetch(
-            `${AI_CONFIG.HUGGINGFACE_API_URL}/${AI_CONFIG.DEFAULT_MODEL}`,
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    inputs: prompt,
-                    parameters: {
-                        max_new_tokens: AI_CONFIG.MAX_TOKENS,
-                        temperature: AI_CONFIG.TEMPERATURE,
-                        return_full_text: false,
-                        do_sample: true,
-                        top_p: 0.95
-                    }
-                })
-            }
-        );
+        // ✅ CALL NETLIFY FUNCTION (instead of HuggingFace directly)
+        const response = await fetch('/.netlify/functions/huggingface', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: AI_CONFIG.DEFAULT_MODEL,
+                inputs: prompt,
+                parameters: {
+                    max_new_tokens: AI_CONFIG.MAX_TOKENS,
+                    temperature: AI_CONFIG.TEMPERATURE,
+                    return_full_text: false,
+                    do_sample: true,
+                    top_p: 0.95
+                }
+            })
+        });
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -101,8 +94,6 @@ ${message}<|im_end|>
         
         // Clean up response
         reply = reply.trim();
-        
-        // Remove any chat template artifacts
         reply = reply.replace(/<\|im_end\|>.*$/s, '').trim();
         reply = reply.replace(/^<\|im_start\|>assistant\s*/i, '').trim();
         
