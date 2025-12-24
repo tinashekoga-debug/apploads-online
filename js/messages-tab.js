@@ -10,7 +10,7 @@ import { getUserConversations } from './conversation-model.js';
 import { openChatScreen } from './chat-controller.js';
 import { escapeHtml, showToast, getTimeAgo } from './ui.js';
 import { updateUnreadBadge } from './chat-controller.js';
-import { afiUI } from './ai-ui.js'; // ✅ ADD THIS IMPORT
+import { afiUI } from './ai-integration.js'; // ✅ Import from ai-integration.js
 
 // =========================
 // Render Messages Tab

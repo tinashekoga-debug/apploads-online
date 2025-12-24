@@ -6,7 +6,6 @@
 // NO imports from main.js to avoid circular dependencies
 // ===========================================
 
-import { afi } from './ai-core.js';
 import { hasApiKey } from './ai-config.js';
 
 // ===========================================
@@ -40,7 +39,8 @@ function showToast(message, type = 'info') {
 // CLASS: AfiUI - Manages chat interface
 // ===========================================
 export class AfiUI {
-    constructor() {
+    constructor(afiInstance) {
+        this.afi = afiInstance;
         this.isOpen = false;
         this.isThinking = false;
     }
@@ -209,7 +209,7 @@ openChat() {
         
         try {
             // Call AI
-            const response = await afi.chat(message);
+            const response = await this.afi.chat(message);
             
             // Remove thinking
             this.removeThinking();
@@ -292,8 +292,3 @@ openChat() {
         if (chatScreen) chatScreen.remove();
     }
 }
-
-// ===========================================
-// EXPORT: Create singleton instance
-// ===========================================
-export const afiUI = new AfiUI();
