@@ -20,36 +20,29 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Convert old format to new Chat Completion format
-    const messages = [
-      {
-        role: "user",
-        content: inputs
-      }
-    ];
-
-    // Use the NEW router endpoint with Chat Completion API
+    // For SmolLM3 (free tier), use the standard inference API endpoint
     const response = await fetch(
-      `https://router.huggingface.co/v1/chat/completions`,
+      `https://api-inference.huggingface.co/models/${model}`,
       {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: `${model}:hf-inference`, // Add :hf-inference suffix for free tier
-          messages: messages,
-          max_tokens: parameters.max_new_tokens || 1024,
-          temperature: parameters.temperature || 0.7,
-          stream: false
+        body: JSON.stringify({ 
+          inputs,
+          parameters: {
+            max_new_tokens: parameters.max_new_tokens || 1024,
+            temperature: parameters.temperature || 0.7,
+            return_full_text: parameters.return_full_text || false,
+            do_sample: parameters.do_sample !== false
+          }
         })
       }
     );
 
     const responseText = await response.text();
     
-    // Try to parse as JSON
     let data;
     try {
       data = JSON.parse(responseText);
@@ -63,29 +56,13 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({ 
           error: 'Invalid response from HuggingFace',
-          response: responseText.substring(0, 200),
+          response: responseText.substring(0, 500),
           status: response.status
         })
       };
     }
 
-    // Convert Chat Completion response to old format for compatibility
-    if (data.choices && data.choices[0]?.message?.content) {
-      const convertedData = [{
-        generated_text: data.choices[0].message.content
-      }];
-      
-      return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify(convertedData)
-      };
-    }
-
-    // Return raw response if conversion fails
+    // Return the data in standard format
     return {
       statusCode: response.status,
       headers: {
@@ -96,6 +73,7 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
+    console.error('Function error:', error);
     return {
       statusCode: 500,
       headers: {
