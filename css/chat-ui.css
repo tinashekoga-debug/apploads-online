@@ -611,3 +611,44 @@
 #myPostsContainer {
     margin-top: -12px;
 }
+
+/* ===========================================
+   FIXES FOR UNIFIED ACCOUNT CARD
+   Add this to the END of chat-ui.css
+   =========================================== */
+
+/* Make myPostsContainer part of the same card */
+#myPostsContainer {
+    margin-top: 16px; /* Space from account info above */
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb; /* Subtle divider */
+}
+
+/* Minimize 3-dot indicator spacing */
+.account-tabs-indicator {
+    padding: 4px 0 8px 0; /* Tight spacing */
+    margin: 0;
+}
+
+/* Remove extra spacing from tabs */
+.account-tabs-scroll {
+    margin: 0;
+    padding-bottom: 0;
+    background: transparent; /* No white background needed inside card */
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Remove spacing from slider */
+#myPostsSlider {
+    margin-top: 0;
+}
+
+/* Ensure account card doesn't have extra bottom margin */
+#account .card {
+    margin-bottom: 12px;
+}
+
+/* Remove any forced spacing from acctState */
+#acctState > *:last-child {
+    margin-bottom: 0 !important;
+}
