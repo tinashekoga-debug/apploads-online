@@ -618,7 +618,7 @@
 
 /* 1. FIX SPACING - Equal distance between cards and dots */
 .account-tabs-indicator {
-    padding: 2px 0 8px 0; /* 2px top, 8px bottom */
+    padding: 1px 0 8px 0; /* 1px top, 8px bottom */
     margin: 0;
     background: transparent;
 }
@@ -687,3 +687,4 @@
     margin-bottom: 0;
     transition: all 0.3s ease;
 }
+

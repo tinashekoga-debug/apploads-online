@@ -3144,30 +3144,6 @@ body.fullscreen-open {
     transform: scale(1.02);
 }
 
-/* Icon Action Bar */
-.icon-action-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    margin-top: 12px;
-    padding: 8px 0;
-}
-
-.icon-action-btn {
-    width: 44px;
-    height: 44px;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: #f8f9fa;
-    color: #666;
-}
-
 .icon-action-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
@@ -3203,21 +3179,21 @@ body.fullscreen-open {
 
 .icon-action-bar {
     display: flex;
-    justify-content: center; /* Changed from space-around */
+    justify-content: center;
     align-items: center;
-    gap: 16px; /* Increased gap */
+    gap: 6px; /* Reduced from 16px */
     margin-top: 12px;
     padding: 8px 0;
-    flex-wrap: nowrap; /* Prevent wrapping */
+    flex-wrap: nowrap;
 }
 
 .icon-action-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    flex: 0 0 auto; /* Changed from flex: 1 - prevents stretching */
-    min-width: 70px; /* Set consistent width */
+    gap: 1px; /* Reduced from 6px - tighter spacing */
+    flex: 0 0 auto;
+    min-width: 68px; /* Slightly reduced */
 }
 
 .icon-action-btn {
@@ -3232,6 +3208,7 @@ body.fullscreen-open {
     transition: all 0.2s ease;
     background: #8E8E93 !important;
     color: white;
+    flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .icon-action-btn:hover {
@@ -3256,11 +3233,12 @@ body.fullscreen-open {
 }
 
 .icon-action-label {
-    font-size: 0.75rem;
+    font-size: 11px; /* Reduced from 0.75rem (12px) */
     color: #666;
     font-weight: 500;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1;
+    margin-top: -20px; /* Pull label closer to icon */
 }
 
 /* ========================= */
