@@ -620,44 +620,23 @@
 /* myPostsContainer is now its own card */
 #myPostsContainer {
     padding: 0; /* Remove default padding since .card class already adds it */
-    margin-top: 0;
+    margin-top: 0; /* Will be controlled by indicator spacing */
 }
 
-/* 3-dot indicator FLOATS BETWEEN CARDS - visible but compact */
+/* 3-dot indicator FLOATS BETWEEN CARDS - minimal space */
 .account-tabs-indicator {
-    padding: 10px 0; /* More space to see the dots clearly */
+    padding: 4px 0; /* Tight squeeze - minimal vertical space */
     margin: 0;
-    background: transparent;
-    text-align: center; /* Center the dots */
-    display: flex; /* Use flexbox for better control */
-    justify-content: center;
-    align-items: center;
-    gap: 8px; /* Space between dots */
+    background: transparent; /* Floats in the gap */
 }
 
-/* Make individual dots more visible */
-.indicator-dot {
-    width: 8px; /* Slightly bigger */
-    height: 8px;
-    border-radius: 50%;
-    background: #cbd5e1;
-    transition: all 0.3s ease;
-    flex-shrink: 0; /* Prevent dots from shrinking */
+/* Adjust spacing when indicator is visible */
+#account .card + .account-tabs-indicator {
+    margin-top: -6px; /* Pull closer to card above */
 }
 
-.indicator-dot.active {
-    background: #0b7d62;
-    transform: scale(1.3); /* Make active dot bigger */
-}
-
-/* Small gap between first card and dots */
-#account .card:first-child {
-    margin-bottom: 8px;
-}
-
-/* Small gap between dots and second card */
 .account-tabs-indicator + #myPostsContainer {
-    margin-top: 8px;
+    margin-top: -6px; /* Pull closer to dots */
 }
 
 /* Remove extra spacing from tabs */
