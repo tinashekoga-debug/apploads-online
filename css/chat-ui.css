@@ -620,23 +620,25 @@
 /* myPostsContainer is now its own card */
 #myPostsContainer {
     padding: 0; /* Remove default padding since .card class already adds it */
-    margin-top: 0; /* Will be controlled by indicator spacing */
+    margin-top: 0;
 }
 
-/* 3-dot indicator FLOATS BETWEEN CARDS - minimal space */
+/* 3-dot indicator FLOATS BETWEEN CARDS - visible but compact */
 .account-tabs-indicator {
-    padding: 4px 0; /* Tight squeeze - minimal vertical space */
+    padding: 8px 0; /* Enough space to see the dots clearly */
     margin: 0;
-    background: transparent; /* Floats in the gap */
+    background: transparent;
+    text-align: center; /* Center the dots */
 }
 
-/* Adjust spacing when indicator is visible */
-#account .card + .account-tabs-indicator {
-    margin-top: -6px; /* Pull closer to card above */
+/* Small gap between first card and dots */
+#account .card:first-child {
+    margin-bottom: 8px;
 }
 
+/* Small gap between dots and second card */
 .account-tabs-indicator + #myPostsContainer {
-    margin-top: -6px; /* Pull closer to dots */
+    margin-top: 8px;
 }
 
 /* Remove extra spacing from tabs */
@@ -662,3 +664,4 @@
 #acctState > *:last-child {
     margin-bottom: 0 !important;
 }
+
