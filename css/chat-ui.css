@@ -613,28 +613,38 @@
 }
 
 /* ===========================================
-   FIXES FOR UNIFIED ACCOUNT CARD
-   Add this to the END of chat-ui.css
+   FIXES FOR SEPARATED ACCOUNT CARDS
+   Replace previous fix in chat-ui.css with this
    =========================================== */
 
-/* Make myPostsContainer part of the same card */
+/* myPostsContainer is now its own card */
 #myPostsContainer {
-    margin-top: 16px; /* Space from account info above */
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb; /* Subtle divider */
+    padding: 0; /* Remove default padding since .card class already adds it */
+    margin-top: 0; /* Will be controlled by indicator spacing */
 }
 
-/* Minimize 3-dot indicator spacing */
+/* 3-dot indicator FLOATS BETWEEN CARDS - minimal space */
 .account-tabs-indicator {
-    padding: 4px 0 8px 0; /* Tight spacing */
+    padding: 4px 0; /* Tight squeeze - minimal vertical space */
     margin: 0;
+    background: transparent; /* Floats in the gap */
+}
+
+/* Adjust spacing when indicator is visible */
+#account .card + .account-tabs-indicator {
+    margin-top: -6px; /* Pull closer to card above */
+}
+
+.account-tabs-indicator + #myPostsContainer {
+    margin-top: -6px; /* Pull closer to dots */
 }
 
 /* Remove extra spacing from tabs */
 .account-tabs-scroll {
     margin: 0;
+    padding: 0 16px; /* Horizontal padding only */
     padding-bottom: 0;
-    background: transparent; /* No white background needed inside card */
+    background: transparent; /* Already white from .card */
     border-bottom: 1px solid #e5e7eb;
 }
 
@@ -643,7 +653,7 @@
     margin-top: 0;
 }
 
-/* Ensure account card doesn't have extra bottom margin */
+/* Normal spacing between the two cards */
 #account .card {
     margin-bottom: 12px;
 }
