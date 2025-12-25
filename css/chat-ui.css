@@ -607,11 +607,7 @@
 }
 
 
-/* 🔥 Remove top spacing on Account section */
-#account.section {
-    padding-top: 0 !important;
-}
-
-#account {
-    outline: 2px solid red;
+/* Pull My Posts section closer to Account header */
+#myPostsContainer {
+    margin-top: -12px;
 }
