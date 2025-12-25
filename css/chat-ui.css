@@ -399,7 +399,7 @@
     display: flex;
     justify-content: center;
     gap: 6px;
-    padding: 6px 0;
+    padding: 2px 0; /* 🔥 tighter */
     background: transparent;
 }
 
@@ -424,7 +424,7 @@
     padding: 0 16px;
     background: white;
     border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 12px;
+    margin-bottom: 0; /* 🔥 IMPORTANT: removes gap */
 }
 
 .account-tabs-scroll::-webkit-scrollbar {
@@ -476,6 +476,13 @@
 
 .tab-count-badge.unread {
     background: #ef4444;
+}
+
+/* Make account tabs behave like a fixed header */
+.account-tabs-scroll {
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 /* =========================
@@ -578,3 +585,18 @@
     }
 }
 
+/* Force 2 tabs per viewport width */
+.account-tab-btn-enhanced {
+    flex: 0 0 50%;
+    text-align: center;
+}
+
+/* Tighten spacing under Account header card */
+#account .card {
+    margin-bottom: 6px; /* was likely 16px+ */
+}
+
+/* Pull tabs closer to dots */
+.account-tabs-scroll {
+    margin-top: 0;
+}
