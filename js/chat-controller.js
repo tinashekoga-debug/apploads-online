@@ -274,9 +274,9 @@ function renderMessages(container) {
     if (currentMessages.length === 0) {
         container.innerHTML = `
             <div class="empty-conversations">
-                <div class="empty-conversations-icon">💬</div>
+                <div class="empty-conversations-icon"></div>
                 <h3>Start a conversation</h3>
-                <p>Send a message about this load</p>
+                <p>Send a message about this ppst</p>
             </div>
         `;
         return;

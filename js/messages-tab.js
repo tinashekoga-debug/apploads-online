@@ -1,8 +1,9 @@
 // ===========================================
-// messages-tab.js
+// messages-tab.js - FIXED (No Spinner)
 // ===========================================
 // Renders the Messages tab in Account section
 // Includes AI assistant (Afi) and conversation list
+// NOW: Shows content immediately, loads data in background
 // ===========================================
 
 import { state } from './main.js';
@@ -18,20 +19,39 @@ export async function renderMessagesTab() {
     const container = document.getElementById('messagesTabContent');
     if (!container) return;
     
-    // Show loading
+    // Check if user is signed in
+    if (!state.currentUser) {
+        renderSignInPrompt();
+        return;
+    }
+    
+    // Show Afi + empty state IMMEDIATELY (no spinner)
     container.innerHTML = `
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <div>Loading messages...</div>
+        <div class="afi-assistant-card" id="afiAssistant">
+            <div class="afi-avatar">A</div>
+            <div class="afi-content">
+                <div class="afi-name">Afi <span class="afi-badge">AI</span></div>
+                <div class="afi-description">Your logistics assistant. Coming soon!</div>
+            </div>
+        </div>
+        
+        <div class="conversations-list">
+            <!-- Conversations load here -->
         </div>
     `;
     
+    // Setup Afi click listener immediately
+    setupAfiListener();
+    
+    // Load conversations in background
+    loadConversationsInBackground(container);
+}
+
+// =========================
+// Load Conversations (Background)
+// =========================
+async function loadConversationsInBackground(container) {
     try {
-        if (!state.currentUser) {
-            renderSignInPrompt();
-            return;
-        }
-        
         // Get conversations
         const conversations = await getUserConversations(state.currentUser.uid);
         
@@ -47,23 +67,38 @@ export async function renderMessagesTab() {
             })
         );
         
-        // Render
-        container.innerHTML = renderConversationsList(conversationsWithData);
+        // Find the conversations list container
+        const listContainer = container.querySelector('.conversations-list');
+        if (!listContainer) return;
         
-        // Add event listeners
-        setupConversationListeners();
+        // Render conversations
+        if (conversationsWithData.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-conversations">
+                    <div class="empty-conversations-icon">💬</div>
+                    <h3>No messages yet</h3>
+                    <p>Message load owners from load cards to start a conversation</p>
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
+            setupConversationListeners();
+        }
         
         // Update unread badge
         updateUnreadBadge();
         
     } catch (error) {
         console.error('Error loading messages:', error);
-        container.innerHTML = `
-            <div class="error-state">
-                <div>Failed to load messages</div>
-                <button onclick="renderMessagesTab()" class="btn small secondary">Retry</button>
-            </div>
-        `;
+        const listContainer = container.querySelector('.conversations-list');
+        if (listContainer) {
+            listContainer.innerHTML = `
+                <div class="error-state">
+                    <div>Failed to load messages</div>
+                    <button onclick="window.renderMessagesTab()" class="btn small secondary">Retry</button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -100,9 +135,9 @@ async function getLoadData(loadId) {
 }
 
 // =========================
-// Render Conversations List
+// Render Conversations HTML
 // =========================
-function renderConversationsList(conversations) {
+function renderConversationsHTML(conversations) {
     if (conversations.length === 0) {
         return `
             <div class="empty-conversations">
@@ -136,25 +171,13 @@ function renderConversationsList(conversations) {
         return acc;
     }, {});
     
-    // Render with AI assistant at top
-    return `
-        <div class="afi-assistant-card" id="afiAssistant">
-            <div class="afi-avatar">A</div>
-            <div class="afi-content">
-                <div class="afi-name">Afi <span class="afi-badge">AI</span></div>
-                <div class="afi-description">Your logistics assistant. Coming soon!</div>
-            </div>
+    // Render grouped conversations
+    return Object.entries(grouped).map(([label, convs]) => `
+        <div class="conversation-group">
+            <div class="conversation-group-label">${escapeHtml(label)}</div>
+            ${convs.map(conv => renderConversationItem(conv)).join('')}
         </div>
-        
-        <div class="conversations-list">
-            ${Object.entries(grouped).map(([label, convs]) => `
-                <div class="conversation-group">
-                    <div class="conversation-group-label">${escapeHtml(label)}</div>
-                    ${convs.map(conv => renderConversationItem(conv)).join('')}
-                </div>
-            `).join('')}
-        </div>
-    `;
+    `).join('');
 }
 
 // =========================
@@ -203,14 +226,12 @@ function renderConversationItem(conv) {
 // Setup Conversation Listeners
 // =========================
 function setupConversationListeners() {
-    // Conversation items
     document.querySelectorAll('.conversation-item').forEach(item => {
         item.addEventListener('click', async function() {
             const conversationId = this.dataset.conversationId;
             const loadId = this.dataset.loadId;
             
             try {
-                // Get load data
                 const loadData = await getLoadData(loadId);
                 openChatScreen(conversationId, loadData);
             } catch (error) {
@@ -219,8 +240,12 @@ function setupConversationListeners() {
             }
         });
     });
-    
-    // AI Assistant
+}
+
+// =========================
+// Setup Afi Listener
+// =========================
+function setupAfiListener() {
     const afiCard = document.getElementById('afiAssistant');
     if (afiCard) {
         afiCard.addEventListener('click', function() {
@@ -257,3 +282,5 @@ export function initializeMessagesTab() {
     // The actual rendering happens when the tab is activated
 }
 
+// Export for window access
+window.renderMessagesTab = renderMessagesTab;
