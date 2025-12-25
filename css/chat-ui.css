@@ -718,10 +718,10 @@
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 20px;
-    padding: 10px 16px;
+    height: 40px;          /* ✅ MATCH send button */
+    padding: 0 14px;       /* ✅ horizontal padding only */
     display: flex;
     align-items: center;
-    min-height: 42px; /* Ensures consistent height */
 }
 
 .chat-input {
@@ -732,8 +732,8 @@
     color: #1e293b;
     resize: none;
     max-height: 100px;
-    min-height: 22px;
-    line-height: 1.4;
+    min-height: unset;     /* ✅ remove forced height */
+    line-height: 1.2;      /* ✅ tighter text */
     outline: none;
     font-family: inherit;
 }

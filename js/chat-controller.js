@@ -1,11 +1,7 @@
 // ===========================================
-// chat-controller.js - FIXED VERSION
+// chat-controller.js - ACTUALLY FIXED NOW
 // ===========================================
-// Improvements:
-// - No loading spinner (optimistic UI)
-// - Instant unread badge removal
-// - Real-time message updates without full reload
-// - Better error handling
+// Fixed: Messages now persist and sync properly
 // ===========================================
 
 import { state } from './main.js';
@@ -52,6 +48,7 @@ export async function openLoadChat(loadData) {
 // =========================
 export function openChatScreen(conversationId, loadData = null) {
     currentConversationId = conversationId;
+    currentMessages = []; // Reset messages
     
     const chatHTML = `
         <div class="chat-screen" id="chatScreen">
@@ -68,7 +65,7 @@ export function openChatScreen(conversationId, loadData = null) {
             
             <div class="chat-container">
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Messages load instantly, no spinner -->
+                    <!-- Messages load instantly -->
                 </div>
                 
                 <div class="chat-input-container">
@@ -169,16 +166,13 @@ async function initializeChat(conversationId, loadData) {
     // Show empty state immediately
     messagesContainer.innerHTML = `
         <div class="empty-conversations">
-            <div class="empty-conversations-icon"></div>
+            <div class="empty-conversations-icon">💬</div>
             <h3>Start a conversation</h3>
-            <p>Send a message about this post</p>
+            <p>Send a message about this load</p>
         </div>
     `;
     
-    // Load messages in background
-    loadChatMessages(conversationId, messagesContainer);
-    
-    // Setup real-time listener FIRST for instant updates
+    // Setup real-time listener FIRST (this will update currentMessages)
     setupMessageListener(conversationId, messagesContainer);
     
     // Send message handler
@@ -186,7 +180,7 @@ async function initializeChat(conversationId, loadData) {
         const text = input.value.trim();
         if (!text || !state.currentUser) return;
         
-        // Optimistic update - add message immediately
+        // Optimistic update - add message immediately to UI
         const optimisticMsg = {
             id: `temp_${Date.now()}`,
             senderId: state.currentUser.uid,
@@ -195,6 +189,7 @@ async function initializeChat(conversationId, loadData) {
             _sending: true
         };
         
+        // Add to current messages and render
         currentMessages.push(optimisticMsg);
         renderMessages(messagesContainer);
         
@@ -204,17 +199,16 @@ async function initializeChat(conversationId, loadData) {
         sendBtn.disabled = true;
         
         try {
-            // Send to Firestore
+            // Send to Firestore (real-time listener will update automatically)
             await sendMessage(conversationId, state.currentUser.uid, text);
             
-            // Remove optimistic message (real one will come via listener)
-            currentMessages = currentMessages.filter(m => m.id !== optimisticMsg.id);
+            // Don't remove optimistic message - listener will replace it with real one
             
         } catch (error) {
             console.error('Error sending message:', error);
             showToast('Failed to send message', 'error');
             
-            // Mark as failed
+            // Mark as failed instead of removing
             const msg = currentMessages.find(m => m.id === optimisticMsg.id);
             if (msg) {
                 msg._failed = true;
@@ -255,28 +249,15 @@ async function initializeChat(conversationId, loadData) {
 }
 
 // =========================
-// Load Messages
-// =========================
-async function loadChatMessages(conversationId, container) {
-    try {
-        currentMessages = await getMessages(conversationId);
-        renderMessages(container);
-    } catch (error) {
-        console.error('Error loading messages:', error);
-        container.innerHTML = '<div class="error-message">Failed to load messages</div>';
-    }
-}
-
-// =========================
 // Render Messages
 // =========================
 function renderMessages(container) {
     if (currentMessages.length === 0) {
         container.innerHTML = `
             <div class="empty-conversations">
-                <div class="empty-conversations-icon"></div>
+                <div class="empty-conversations-icon">💬</div>
                 <h3>Start a conversation</h3>
-                <p>Send a message about this ppst</p>
+                <p>Send a message about this load</p>
             </div>
         `;
         return;
@@ -321,6 +302,7 @@ function formatMessageTime(timestamp) {
 // Setup Real-time Listener
 // =========================
 function setupMessageListener(conversationId, container) {
+    // Clean up existing listener
     if (messageListeners.has(conversationId)) {
         messageListeners.get(conversationId)();
     }
@@ -330,11 +312,20 @@ function setupMessageListener(conversationId, container) {
         const q = query(messagesRef, orderBy('createdAt', 'asc'));
         
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            // Update messages from snapshot
-            currentMessages = snapshot.docs.map(doc => ({
+            // Get all messages from Firestore
+            const firestoreMessages = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+            
+            // Remove optimistic messages that now exist in Firestore
+            const optimisticMessages = currentMessages.filter(m => 
+                m.id.startsWith('temp_') && 
+                !firestoreMessages.find(fm => fm.text === m.text && fm.senderId === m.senderId)
+            );
+            
+            // Combine: Firestore messages + any remaining optimistic/failed messages
+            currentMessages = [...firestoreMessages, ...optimisticMessages];
             
             renderMessages(container);
         }, (error) => {
