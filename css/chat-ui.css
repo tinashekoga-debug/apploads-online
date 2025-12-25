@@ -600,3 +600,8 @@
 .account-tabs-scroll {
     margin-top: 0;
 }
+
+/* DEBUG: remove spacing coming from acctState content */
+#acctState > *:last-child {
+    margin-bottom: 0 !important;
+}
