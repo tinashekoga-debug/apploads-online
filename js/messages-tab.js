@@ -19,6 +19,12 @@ export async function renderMessagesTab() {
     const container = document.getElementById('messagesTabContent');
     if (!container) return;
     
+    // Cleanup existing listener when re-rendering
+    if (conversationsUnsubscribe) {
+        conversationsUnsubscribe();
+        conversationsUnsubscribe = null;
+    }
+    
     // Check if user is signed in
     if (!state.currentUser) {
         renderSignInPrompt();
@@ -51,55 +57,8 @@ export async function renderMessagesTab() {
 // Load Conversations (Background)
 // =========================
 async function loadConversationsInBackground(container) {
-    try {
-        // Get conversations
-        const conversations = await getUserConversations(state.currentUser.uid);
-        
-        // Get load data for each conversation
-        const conversationsWithData = await Promise.all(
-            conversations.map(async (conv) => {
-                try {
-                    const loadData = await getLoadData(conv.loadId);
-                    return { ...conv, loadData };
-                } catch (error) {
-                    return { ...conv, loadData: null };
-                }
-            })
-        );
-        
-        // Find the conversations list container
-        const listContainer = container.querySelector('.conversations-list');
-        if (!listContainer) return;
-        
-        // Render conversations
-        if (conversationsWithData.length === 0) {
-            listContainer.innerHTML = `
-                <div class="empty-conversations">
-                    <div class="empty-conversations-icon">💬</div>
-                    <h3>No messages yet</h3>
-                    <p>Message load owners from load cards to start a conversation</p>
-                </div>
-            `;
-        } else {
-            listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
-            setupConversationListeners();
-        }
-        
-        // Update unread badge
-        updateUnreadBadge();
-        
-    } catch (error) {
-        console.error('Error loading messages:', error);
-        const listContainer = container.querySelector('.conversations-list');
-        if (listContainer) {
-            listContainer.innerHTML = `
-                <div class="error-state">
-                    <div>Failed to load messages</div>
-                    <button onclick="window.renderMessagesTab()" class="btn small secondary">Retry</button>
-                </div>
-            `;
-        }
-    }
+    // Setup real-time listener instead of one-time load
+    setupConversationsListener(container);
 }
 
 // =========================
@@ -256,6 +215,76 @@ function setupAfiListener() {
 }
 
 // =========================
+// Setup Real-time Conversations Listener
+// =========================
+let conversationsUnsubscribe = null;
+
+async function setupConversationsListener(container) {
+    // Clean up existing listener
+    if (conversationsUnsubscribe) {
+        conversationsUnsubscribe();
+        conversationsUnsubscribe = null;
+    }
+    
+    if (!state.currentUser) return;
+    
+    try {
+        const { db, collection, query, where, orderBy, onSnapshot } = await import('./firebase-config.js');
+        const conversationsRef = collection(db, 'conversations');
+        const q = query(
+            conversationsRef,
+            where('participants', 'array-contains', state.currentUser.uid),
+            orderBy('lastMessageAt', 'desc')
+        );
+        
+        conversationsUnsubscribe = onSnapshot(q, async (snapshot) => {
+            const conversations = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Get load data for each conversation
+            const conversationsWithData = await Promise.all(
+                conversations.map(async (conv) => {
+                    try {
+                        const loadData = await getLoadData(conv.loadId);
+                        return { ...conv, loadData };
+                    } catch (error) {
+                        return { ...conv, loadData: null };
+                    }
+                })
+            );
+            
+            // Find the conversations list container
+            const listContainer = container.querySelector('.conversations-list');
+            if (!listContainer) return;
+            
+            // Render conversations
+            if (conversationsWithData.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-conversations">
+                        <div class="empty-conversations-icon">💬</div>
+                        <h3>No messages yet</h3>
+                        <p>Message load owners from load cards to start a conversation</p>
+                    </div>
+                `;
+            } else {
+                listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
+                setupConversationListeners();
+            }
+            
+            // Update unread badge
+            updateUnreadBadge();
+        }, (error) => {
+            console.error('Conversations listener error:', error);
+        });
+        
+    } catch (error) {
+        console.error('Error setting up conversations listener:', error);
+    }
+}
+
+// =========================
 // Render Sign-In Prompt
 // =========================
 function renderSignInPrompt() {
@@ -280,6 +309,16 @@ function renderSignInPrompt() {
 export function initializeMessagesTab() {
     // This will be called when the Account section is rendered
     // The actual rendering happens when the tab is activated
+}
+
+// =========================
+// Cleanup (for sign out)
+// =========================
+export function cleanupMessagesTab() {
+    if (conversationsUnsubscribe) {
+        conversationsUnsubscribe();
+        conversationsUnsubscribe = null;
+    }
 }
 
 // Export for window access

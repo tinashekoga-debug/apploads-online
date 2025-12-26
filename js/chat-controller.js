@@ -46,7 +46,7 @@ export async function openLoadChat(loadData) {
 // =========================
 // Open Chat Screen
 // =========================
-export function openChatScreen(conversationId, loadData = null) {
+export async function openChatScreen(conversationId, loadData = null) {
     currentConversationId = conversationId;
     currentMessages = []; // Reset messages
     
@@ -92,12 +92,15 @@ export function openChatScreen(conversationId, loadData = null) {
     overlay.innerHTML = chatHTML;
     document.body.appendChild(overlay);
     
-    // Mark as read IMMEDIATELY (optimistic update)
+   // Mark as read IMMEDIATELY (optimistic update)
     markAsReadOptimistic(conversationId);
+    
+    // Load existing messages first, then setup listener
+    await loadInitialMessages(conversationId);
     
     initializeChat(conversationId, loadData);
 }
-
+    
 // =========================
 // Render Load Header
 // =========================
@@ -151,7 +154,23 @@ function markAsReadOptimistic(conversationId) {
             .catch(err => console.error('Failed to mark as read:', err));
     }, 1000);
 }
-
+    
+    // =========================
+    // Load Initial Messages
+    // =========================
+async function loadInitialMessages(conversationId) {
+    try {
+        const messages = await getMessages(conversationId);
+        currentMessages = messages.map(msg => ({
+            id: msg.id,
+            ...msg
+        }));
+    } catch (error) {
+        console.error('Error loading initial messages:', error);
+        currentMessages = [];
+    }
+}
+    
 // =========================
 // Initialize Chat
 // =========================
@@ -297,6 +316,16 @@ function formatMessageTime(timestamp) {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
+    
+    // =========================
+// Get Timestamp (helper)
+// =========================
+function getTimestamp(timestamp) {
+    if (!timestamp) return 0;
+    if (timestamp.toDate) return timestamp.toDate().getTime();
+    if (timestamp instanceof Date) return timestamp.getTime();
+    return new Date(timestamp).getTime();
+}
 
 // =========================
 // Setup Real-time Listener
@@ -318,13 +347,19 @@ function setupMessageListener(conversationId, container) {
                 ...doc.data()
             }));
             
-            // Remove optimistic messages that now exist in Firestore
-            const optimisticMessages = currentMessages.filter(m => 
-                m.id.startsWith('temp_') && 
-                !firestoreMessages.find(fm => fm.text === m.text && fm.senderId === m.senderId)
-            );
+            // Keep only optimistic messages that don't match any Firestore message
+            // Match by text AND senderId AND timestamp within 5 seconds
+            const optimisticMessages = currentMessages.filter(m => {
+                if (!m.id.startsWith('temp_')) return false;
+                
+                return !firestoreMessages.some(fm => 
+                    fm.text === m.text && 
+                    fm.senderId === m.senderId &&
+                    Math.abs(getTimestamp(fm.createdAt) - getTimestamp(m.createdAt)) < 5000
+                );
+            });
             
-            // Combine: Firestore messages + any remaining optimistic/failed messages
+            // Combine: Firestore messages + remaining optimistic messages
             currentMessages = [...firestoreMessages, ...optimisticMessages];
             
             renderMessages(container);

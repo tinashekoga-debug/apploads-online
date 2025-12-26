@@ -36,7 +36,7 @@ import { getAnalytics, logEvent } from 'https://www.gstatic.com/firebasejs/10.7.
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVmRSQLBi2PESf1Tj43-t0x64lki-H0dU",
-  authDomain: "apploads-online.firebaseapp.com",  // ← CHANGE THIS LINE
+  authDomain: "apploads-online.web.app",  // ← CHANGE THIS LINE
   projectId: "apploads-online",
   storageBucket: "apploads-online.firebasestorage.app",
   messagingSenderId: "912753061359",

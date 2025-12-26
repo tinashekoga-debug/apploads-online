@@ -69,6 +69,11 @@ export async function logout() {
 
     try {
         const uid = state.currentUser?.uid || null;
+        
+        // Cleanup messages listener BEFORE signing out
+        const { cleanupMessagesTab } = await import('./messages-tab.js');
+        cleanupMessagesTab();
+        
         await signOut(auth);
 
         trackEvent('logout', {
