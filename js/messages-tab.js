@@ -232,16 +232,23 @@ async function setupConversationsListener(container) {
         const { db, collection, query, where, orderBy, onSnapshot } = await import('./firebase-config.js');
         const conversationsRef = collection(db, 'conversations');
         const q = query(
-            conversationsRef,
-            where('participants', 'array-contains', state.currentUser.uid),
-            orderBy('lastMessageAt', 'desc')
-        );
+    conversationsRef,
+    where('participants', 'array-contains', state.currentUser.uid)
+    // Removed orderBy to avoid index requirement
+);
         
         conversationsUnsubscribe = onSnapshot(q, async (snapshot) => {
             const conversations = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+    id: doc.id,
+    ...doc.data()
+}));
+
+// Add this sorting manually:
+conversations.sort((a, b) => {
+    const timeA = a.lastMessageAt?.toDate?.() || a.createdAt?.toDate?.() || new Date(0);
+    const timeB = b.lastMessageAt?.toDate?.() || b.createdAt?.toDate?.() || new Date(0);
+    return timeB - timeA;
+});
             
             // Get load data for each conversation
             const conversationsWithData = await Promise.all(
