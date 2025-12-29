@@ -157,29 +157,36 @@
     align-items: flex-end;
 }
 
+/* =========================
+   Message Input - FIXED
+   ========================= */
 .chat-input-wrapper {
     flex: 1;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: transparent; /* Changed from #f8fafc */
+    border: none; /* Remove wrapper border */
     border-radius: 20px;
-    height: 40px; /* ADD THIS LINE */
-    padding: 0 16px; /* Change to horizontal padding only */
+    min-height: 40px;
+    max-height: 120px;
     display: flex;
     align-items: center;
+    transition: all 0.2s ease;
 }
 
 .chat-input {
     flex: 1;
-    border: none;
-    background: none;
+    background: #f8fafc; /* Move background here */
+    border: 1px solid #e2e8f0; /* Move border here */
+    border-radius: 20px; /* Move border-radius here */
     font-size: 15px;
     color: #1e293b;
     resize: none;
     max-height: 100px;
-    min-height: 22px;
+    min-height: 40px; /* Match wrapper min-height */
     line-height: 1.4;
     outline: none;
     font-family: inherit;
+    padding: 9px 16px;
+    overflow-y: auto;
 }
 
 .chat-input:focus {
