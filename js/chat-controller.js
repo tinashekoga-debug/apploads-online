@@ -284,12 +284,41 @@ function renderMessages(container) {
     
     const wasScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
     
-    container.innerHTML = currentMessages.map(msg => {
+    // Group messages by date
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    let html = '';
+    let lastDate = null;
+    
+    currentMessages.forEach(msg => {
+        const msgDate = msg.createdAt?.toDate ? 
+            msg.createdAt.toDate().toDateString() : 
+            new Date(msg.createdAt || Date.now()).toDateString();
+        
+        // Add date separator if date changed
+        if (msgDate !== lastDate) {
+            let dateLabel;
+            if (msgDate === today) dateLabel = 'Today';
+            else if (msgDate === yesterday) dateLabel = 'Yesterday';
+            else {
+                const date = new Date(msgDate);
+                dateLabel = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: new Date().getFullYear() !== date.getFullYear() ? 'numeric' : undefined
+                });
+            }
+            
+            html += `<div class="chat-date-separator">${escapeHtml(dateLabel)}</div>`;
+            lastDate = msgDate;
+        }
+        
         const isSent = msg.senderId === state.currentUser?.uid;
         const statusIcon = msg._sending ? `<span class="msg-status">⏱️</span>` : 
                           msg._failed ? `<span class="msg-status msg-failed">❌ Failed</span>` : '';
         
-        return `
+        html += `
             <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
                 <div class="message-text">${escapeHtml(msg.text)}</div>
                 <div class="message-timestamp">
@@ -298,7 +327,9 @@ function renderMessages(container) {
                 </div>
             </div>
         `;
-    }).join('');
+    });
+    
+    container.innerHTML = html;
     
     // Auto-scroll if user was at bottom
     if (wasScrolledToBottom) {
