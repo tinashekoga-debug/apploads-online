@@ -10,7 +10,7 @@
 .chat-header {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 50; /* Changed from 100 */
     background: white;
     border-bottom: 1px solid #e5e7eb;
     padding: 14px 16px;
@@ -482,7 +482,9 @@
 .account-tabs-scroll {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 40; /* Changed from 20 - below chat-header, above content */
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 /* =========================
@@ -495,7 +497,7 @@
     right: 0;
     bottom: 0;
     background: white;
-    z-index: 10000;
+    z-index: 1000; /* Changed from 10000 - way too high */
     display: flex;
     flex-direction: column;
     animation: slideInUp 0.3s ease;
@@ -519,7 +521,7 @@
     background: white;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 50; /* Ensure it stays on top within chat screen */
 }
 
 .chat-back-btn {
@@ -697,89 +699,6 @@
 .msg-failed {
     color: #ef4444;
     opacity: 1;
-}
-
-/* =========================
-   Message Input - FIXED ALIGNMENT
-   ========================= */
-.chat-input-container {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    border-top: 1px solid #e5e7eb;
-    padding: 12px 16px;
-    display: flex;
-    gap: 10px;
-    align-items: center; /* Changed from flex-end to center */
-}
-
-.chat-input-wrapper {
-    flex: 1;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    height: 40px;          /* ✅ MATCH send button */
-    padding: 0 14px;       /* ✅ horizontal padding only */
-    display: flex;
-    align-items: center;
-}
-
-.chat-input {
-    flex: 1;
-    border: none;
-    background: none;
-    font-size: 15px;
-    color: #1e293b;
-    resize: none;
-    max-height: 100px;
-    min-height: unset;     /* ✅ remove forced height */
-    line-height: 1.2;      /* ✅ tighter text */
-    outline: none;
-    font-family: inherit;
-}
-
-.chat-input:focus {
-    outline: none;
-}
-
-.chat-input::placeholder {
-    color: #94a3b8;
-}
-
-.chat-send-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0b7d62, #20a58a);
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    align-self: flex-end; /* Aligns to bottom when textarea grows */
-}
-
-.chat-send-btn:hover:not(:disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(11, 125, 98, 0.3);
-}
-
-.chat-send-btn:active:not(:disabled) {
-    transform: scale(0.95);
-}
-
-.chat-send-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: #94a3b8;
-}
-
-.chat-send-btn svg {
-    width: 18px;
-    height: 18px;
 }
 
 /* Status indicators for optimistic UI */
