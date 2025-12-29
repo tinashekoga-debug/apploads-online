@@ -104,27 +104,13 @@
     padding: 9px 16px;
     overflow-y: auto;
     
-    /* Hide scrollbar until needed */
-    scrollbar-width: thin; /* Firefox - thin scrollbar */
-    scrollbar-color: #cbd5e1 transparent; /* Firefox - thumb and track colors */
+    /* Hide scrollbar completely */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 
-/* Webkit browsers (Chrome, Safari, Edge) */
 .chat-input::-webkit-scrollbar {
-    width: 6px;
-}
-
-.chat-input::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.chat-input::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-.chat-input::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    display: none; /* Chrome/Safari/Opera */
 }
 
 /* =========================
