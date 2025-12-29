@@ -82,7 +82,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 120px; /* INCREASED - space for sticky input */
+    padding-bottom: 300px; /* INCREASED - space for sticky input */
     display: flex;
     flex-direction: column;
     gap: 12px;
