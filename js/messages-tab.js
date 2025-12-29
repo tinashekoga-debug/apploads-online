@@ -13,6 +13,23 @@ import { escapeHtml, showToast, getTimeAgo } from './ui.js';
 import { updateUnreadBadge } from './chat-controller.js';
 
 // =========================
+// Load Data Cache (in-memory)
+// =========================
+const loadDataCache = new Map();
+
+// =========================
+// Render Debounce (anti-flicker)
+// =========================
+let renderTimeout = null;
+
+function scheduleRender(fn, delay = 60) {
+    if (renderTimeout) {
+        clearTimeout(renderTimeout);
+    }
+    renderTimeout = setTimeout(fn, delay);
+}
+
+// =========================
 // Render Messages Tab
 // =========================
 export async function renderMessagesTab() {
@@ -62,31 +79,50 @@ async function loadConversationsInBackground(container) {
 }
 
 // =========================
-// Get Load Data
+// Get Load Data (with cache)
 // =========================
 async function getLoadData(loadId) {
-    // Try to find in state first
-    const loadFromState = state.loads.find(l => l.id === loadId) || 
-                         state.sales.find(s => s.id === loadId);
-    
-    if (loadFromState) return loadFromState;
-    
-    // If not found, fetch from Firestore
+    if (!loadId) return null;
+
+    // 1. Check in-memory cache
+    if (loadDataCache.has(loadId)) {
+        return loadDataCache.get(loadId);
+    }
+
+    // 2. Try state first (fastest)
+    const loadFromState =
+        state.loads.find(l => l.id === loadId) ||
+        state.sales.find(s => s.id === loadId);
+
+    if (loadFromState) {
+        loadDataCache.set(loadId, loadFromState);
+        return loadFromState;
+    }
+
+    // 3. Fetch from Firestore
     try {
         const { db, doc, getDoc } = await import('./firebase-config.js');
+
+        // Try loads collection
         const loadDoc = await getDoc(doc(db, 'loads', loadId));
-        
         if (loadDoc.exists()) {
-            return { id: loadId, ...loadDoc.data() };
+            const loadData = { id: loadId, ...loadDoc.data() };
+            loadDataCache.set(loadId, loadData);
+            return loadData;
         }
-        
-        // Try marketplace
+
+        // Try marketplace collection
         const saleDoc = await getDoc(doc(db, 'marketplace', loadId));
         if (saleDoc.exists()) {
-            return { id: loadId, ...saleDoc.data() };
+            const loadData = { id: loadId, ...saleDoc.data() };
+            loadDataCache.set(loadId, loadData);
+            return loadData;
         }
-        
+
+        // Cache miss (avoid re-fetching invalid IDs)
+        loadDataCache.set(loadId, null);
         return null;
+
     } catch (error) {
         console.error('Error fetching load data:', error);
         return null;
@@ -276,8 +312,13 @@ conversations.sort((a, b) => {
                     </div>
                 `;
             } else {
-                listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
-                setupConversationListeners();
+               const previousScrollTop = listContainer.scrollTop;
+
+scheduleRender(() => {
+    listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
+    setupConversationListeners();
+    listContainer.scrollTop = previousScrollTop;
+});
             }
             
             // Update unread badge

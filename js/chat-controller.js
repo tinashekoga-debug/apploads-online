@@ -6,6 +6,7 @@
 
 import { state } from './main.js';
 import { escapeHtml, showToast } from './ui.js';
+import { sendTypingIndicator, clearTypingIndicator, listenToTyping, cleanupTypingListeners } from './typing-indicator.js';
 import { authOpen } from './auth.js';
 import { 
     createConversation, 
@@ -191,6 +192,36 @@ async function initializeChat(conversationId, loadData) {
         </div>
     `;
     
+    // Add typing indicator UI
+const typingIndicatorElement = document.createElement('div');
+typingIndicatorElement.className = 'typing-indicator-container';
+typingIndicatorElement.style.display = 'none';
+typingIndicatorElement.innerHTML = `
+    <div class="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+`;
+messagesContainer.parentElement.insertBefore(typingIndicatorElement, messagesContainer.nextSibling);
+
+// Listen to other user typing
+listenToTyping(conversationId, state.currentUser.uid, (isTyping) => {
+    if (typingIndicatorElement) {
+        typingIndicatorElement.style.display = isTyping ? 'flex' : 'none';
+        
+        // Auto-scroll if near bottom
+        if (isTyping) {
+            const isNearBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop <= messagesContainer.clientHeight + 100;
+            if (isNearBottom) {
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 50);
+            }
+        }
+    }
+});
+    
     // Setup real-time listener FIRST (this will update currentMessages)
     setupMessageListener(conversationId, messagesContainer);
     
@@ -198,6 +229,9 @@ async function initializeChat(conversationId, loadData) {
     async function sendChatMessage() {
         const text = input.value.trim();
         if (!text || !state.currentUser) return;
+        
+        // ADD THIS LINE RIGHT HERE:
+    clearTypingIndicator(conversationId, state.currentUser.uid);
         
         // Optimistic update - add message immediately to UI
         const optimisticMsg = {
@@ -238,11 +272,19 @@ async function initializeChat(conversationId, loadData) {
     }
     
     // Auto-resize textarea
-    input.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-        sendBtn.disabled = !this.value.trim();
-    });
+   input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+
+    const hasText = this.value.trim().length > 0;
+    sendBtn.disabled = !hasText;
+
+    if (hasText) {
+        sendTypingIndicator(conversationId, state.currentUser.uid);
+    } else {
+        clearTypingIndicator(conversationId, state.currentUser.uid);
+    }
+});
     
     // Send on Enter
     input.addEventListener('keydown', function(e) {
@@ -406,6 +448,7 @@ function setupMessageListener(conversationId, container) {
 // Close Chat Screen
 // =========================
 export function closeChatScreen() {
+    cleanupTypingListeners()
     messageListeners.forEach(unsubscribe => unsubscribe());
     messageListeners.clear();
     

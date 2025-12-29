@@ -10,7 +10,7 @@
 .chat-header {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 50; /* Changed from 100 */
     background: white;
     border-bottom: 1px solid #e5e7eb;
     padding: 14px 16px;
@@ -65,7 +65,7 @@
 }
 
 /* =========================
-   Messages Container
+   Messages Container - FIXED
    ========================= */
 .chat-container {
     display: flex;
@@ -74,7 +74,7 @@
     background: #fafafa;
     overflow: hidden;
     position: relative;
-    padding-bottom: 0;
+    padding-bottom: 0; /* Ensure no padding at container level */
 }
 
 .chat-messages {
@@ -82,41 +82,12 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 120px;
+    padding-bottom: 300px; /* INCREASED - space for sticky input */
     display: flex;
     flex-direction: column;
     gap: 12px;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
-}
-
-/* =========================
-   Message Input - CONSOLIDATED (NO DUPLICATES)
-   ========================= */
-.chat-input-container {
-    position: sticky;
-    bottom: 0;
-    flex-shrink: 0;
-    background: white;
-    border-top: 1px solid #e5e7eb;
-    padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-    z-index: 45;
-}
-
-.chat-input-wrapper {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-radius: 20px;
-    min-height: 40px;
-    max-height: 120px;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
 }
 
 .chat-input {
@@ -134,51 +105,14 @@
     font-family: inherit;
     padding: 9px 16px;
     overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    
+    /* Hide scrollbar completely */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 
 .chat-input::-webkit-scrollbar {
-    display: none;
-}
-
-.chat-input:focus {
-    outline: none;
-    border-color: #0b7d62;
-}
-
-.chat-input::placeholder {
-    color: #94a3b8;
-}
-
-.chat-send-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0b7d62, #20a58a);
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.chat-send-btn:hover:not(:disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(11, 125, 98, 0.3);
-}
-
-.chat-send-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.chat-send-btn svg {
-    width: 18px;
-    height: 18px;
+    display: none; /* Chrome/Safari/Opera */
 }
 
 /* =========================
@@ -236,6 +170,92 @@
 }
 
 /* =========================
+   Message Input - FIXED
+   ========================= */
+.chat-input-container {
+    position: sticky;
+    bottom: 0;
+    flex-shrink: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    z-index: 45;
+}
+
+/* =========================
+   Message Input - FIXED
+   ========================= */
+.chat-input-wrapper {
+    flex: 1;
+    background: transparent; /* Changed from #f8fafc */
+    border: none; /* Remove wrapper border */
+    border-radius: 20px;
+    min-height: 40px;
+    max-height: 120px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.chat-input {
+    flex: 1;
+    background: #f8fafc; /* Move background here */
+    border: 1px solid #e2e8f0; /* Move border here */
+    border-radius: 20px; /* Move border-radius here */
+    font-size: 15px;
+    color: #1e293b;
+    resize: none;
+    max-height: 100px;
+    min-height: 40px; /* Match wrapper min-height */
+    line-height: 1.4;
+    outline: none;
+    font-family: inherit;
+    padding: 9px 16px;
+    overflow-y: auto;
+}
+
+.chat-input:focus {
+    outline: none;
+}
+
+.chat-input::placeholder {
+    color: #94a3b8;
+}
+
+.chat-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0b7d62, #20a58a);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(11, 125, 98, 0.3);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chat-send-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* =========================
    Conversation List (Inbox)
    ========================= */
 .conversations-list {
@@ -249,7 +269,7 @@
     cursor: pointer;
     transition: background 0.2s ease;
     align-items: flex-start;
-    gap: 0;
+    gap: 0; /* Changed from 12px to remove gap */
 }
 
 .conversation-item:hover {
@@ -257,7 +277,7 @@
 }
 
 .conversation-avatar {
-    display: none;
+    display: none; /* Hide the avatar */
 }
 
 .conversation-content {
@@ -403,14 +423,14 @@
 }
 
 /* =========================
-   Account Tabs with Page Indicator - CONSOLIDATED
+   Account Tabs with Page Indicator
    ========================= */
+/* Compact floating tabs - outside card container */
 .account-tabs-indicator {
     display: flex;
     justify-content: center;
     gap: 6px;
-    padding: 1px 0 8px 0;
-    margin: 0;
+    padding: 2px 0; /* 🔥 tighter */
     background: transparent;
 }
 
@@ -435,12 +455,7 @@
     padding: 0 16px;
     background: white;
     border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 0;
-    margin-top: 0;
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    transition: all 0.3s ease;
+    margin-bottom: 0; /* 🔥 IMPORTANT: removes gap */
 }
 
 .account-tabs-scroll::-webkit-scrollbar {
@@ -448,19 +463,17 @@
 }
 
 .account-tab-btn-enhanced {
-    padding: 12px 16px;
+    padding: 10px 16px;
     background: none;
     border: none;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #64748b;
     white-space: nowrap;
     cursor: pointer;
     position: relative;
-    flex: 0 0 50%;
-    text-align: center;
     flex-shrink: 0;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease;
 }
 
 .account-tab-btn-enhanced:hover {
@@ -469,8 +482,6 @@
 
 .account-tab-btn-enhanced.active {
     color: #0b7d62;
-    background: rgba(11, 125, 98, 0.08);
-    border-radius: 8px 8px 0 0;
 }
 
 .account-tab-btn-enhanced.active::after {
@@ -479,7 +490,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 2px;
     background: #0b7d62;
     border-radius: 2px 2px 0 0;
 }
@@ -498,31 +509,13 @@
     background: #ef4444;
 }
 
-/* =========================
-   Account Spacing Adjustments
-   ========================= */
-#account .card {
-    margin-bottom: 6px;
-}
-
-#account > .card:first-child {
-    margin-bottom: 12px;
-}
-
-#account .card + .account-tabs-indicator {
-    margin-top: 0;
-}
-
-.account-tabs-indicator + #myPostsContainer {
-    margin-top: 0;
-}
-
-#acctState > *:last-child {
-    margin-bottom: 0 !important;
-}
-
-#myPostsContainer {
-    margin-top: -12px;
+/* Make account tabs behave like a fixed header */
+.account-tabs-scroll {
+    position: sticky;
+    top: 0;
+    z-index: 40; /* Changed from 20 - below chat-header, above content */
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 /* =========================
@@ -535,7 +528,7 @@
     right: 0;
     bottom: 0;
     background: white;
-    z-index: 1000;
+    z-index: 1000; /* Changed from 10000 - way too high */
     display: flex;
     flex-direction: column;
     animation: slideInUp 0.3s ease;
@@ -559,7 +552,7 @@
     background: white;
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 50; /* Ensure it stays on top within chat screen */
 }
 
 .chat-back-btn {
@@ -587,53 +580,6 @@
     font-size: 16px;
     font-weight: 700;
     color: #1e293b;
-}
-
-/* =========================
-   Message Status
-   ========================= */
-.msg-status {
-    margin-left: 4px;
-    font-size: 11px;
-    opacity: 0.7;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-}
-
-.msg-failed {
-    color: #ef4444;
-    opacity: 1;
-    font-weight: 600;
-}
-
-/* =========================
-   Date Separators
-   ========================= */
-.chat-date-separator {
-    text-align: center;
-    font-size: 12px;
-    color: #94a3b8;
-    margin: 16px 0 12px 0;
-    position: relative;
-}
-
-.chat-date-separator::before,
-.chat-date-separator::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 35%;
-    height: 1px;
-    background: #e2e8f0;
-}
-
-.chat-date-separator::before {
-    left: 0;
-}
-
-.chat-date-separator::after {
-    right: 0;
 }
 
 /* =========================
@@ -669,5 +615,213 @@
     .account-tab-btn-enhanced {
         padding: 12px 14px;
         font-size: 14px;
+    }
+}
+
+/* Force 2 tabs per viewport width */
+.account-tab-btn-enhanced {
+    flex: 0 0 50%;
+    text-align: center;
+}
+
+/* Tighten spacing under Account header card */
+#account .card {
+    margin-bottom: 6px; /* was likely 16px+ */
+}
+
+/* Pull tabs closer to dots */
+.account-tabs-scroll {
+    margin-top: 0;
+}
+
+/* DEBUG: remove spacing coming from acctState content */
+#acctState > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+
+/* Pull My Posts section closer to Account header */
+#myPostsContainer {
+    margin-top: -12px;
+}
+
+/* ===========================================
+   FIXES FOR REQUIREMENTS 1, 3, 4
+   =========================================== */
+
+/* 1. FIX SPACING - Equal distance between cards and dots */
+.account-tabs-indicator {
+    padding: 1px 0 8px 0; /* 1px top, 8px bottom */
+    margin: 0;
+    background: transparent;
+}
+
+#account .card + .account-tabs-indicator {
+    margin-top: 0; /* Remove negative margin */
+}
+
+.account-tabs-indicator + #myPostsContainer {
+    margin-top: 0; /* Remove negative margin */
+}
+
+/* Proper spacing between Account header and dots */
+#account > .card:first-child {
+    margin-bottom: 12px; /* Space before dots */
+}
+
+/* 3. INCREASE TAB FONT SIZE - Match original */
+.account-tab-btn-enhanced {
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    font-size: 16px; /* Increased from 14px */
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+/* 4. SUBTLE GREEN HIGHLIGHT - Active tab background */
+.account-tab-btn-enhanced.active {
+    color: #0b7d62;
+    background: rgba(11, 125, 98, 0.08); /* Subtle mint green tint */
+    border-radius: 8px 8px 0 0;
+}
+
+.account-tab-btn-enhanced.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px; /* Slightly thicker */
+    background: #0b7d62;
+    border-radius: 2px 2px 0 0;
+}
+
+/* Ensure tabs maintain proper width when visibility changes */
+.account-tab-btn-enhanced {
+    flex: 0 0 50%;
+    text-align: center;
+}
+
+/* Smooth transitions when tabs show/hide */
+.account-tabs-scroll {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 16px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+}
+
+.msg-status {
+    margin-left: 4px;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.msg-failed {
+    color: #ef4444;
+    opacity: 1;
+}
+
+/* Status indicators for optimistic UI */
+.msg-status {
+    margin-left: 4px;
+    font-size: 11px;
+    opacity: 0.7;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.msg-failed {
+    color: #ef4444;
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Date separators in chat */
+.chat-date-separator {
+    text-align: center;
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 16px 0 12px 0;
+    position: relative;
+}
+
+.chat-date-separator::before,
+.chat-date-separator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.chat-date-separator::before {
+    left: 0;
+}
+
+.chat-date-separator::after {
+    right: 0;
+}
+
+/* Typing Indicator Container */
+.typing-indicator-container {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    background: var(--background);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Typing Indicator Animation */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: var(--card-bg);
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
     }
 }
