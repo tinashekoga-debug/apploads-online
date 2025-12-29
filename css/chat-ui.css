@@ -65,29 +65,29 @@
 }
 
 /* =========================
-   Messages Container
+   Messages Container - FIXED
    ========================= */
 .chat-container {
     display: flex;
     flex-direction: column;
-    flex: 1; /* ADD THIS - takes remaining space */
+    height: 100%;
     background: #fafafa;
-    overflow: hidden;
-    position: relative; /* ADD THIS - creates positioning context */
+    overflow: hidden; /* ADD THIS - prevents content overflow */
 }
 
 .chat-messages {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: hidden; /* ADD THIS */
     padding: 16px;
-    padding-bottom: 90px; /* Space for input - adjust as needed */
+    padding-bottom: 16px; /* REDUCED from 80px */
     display: flex;
     flex-direction: column;
     gap: 12px;
     -webkit-overflow-scrolling: touch;
-    min-height: 0;
+    min-height: 0; /* CRITICAL - allows flex item to shrink */
 }
+
 
 /* =========================
    Message Bubbles
@@ -144,20 +144,17 @@
 }
 
 /* =========================
-   Message Input - FIXED PROPERLY
+   Message Input - FIXED
    ========================= */
 .chat-input-container {
-    position: absolute; /* CHANGED from fixed */
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: relative; /* CHANGED from sticky */
+    flex-shrink: 0; /* ADD THIS - prevents input from shrinking */
     background: white;
     border-top: 1px solid #e5e7eb;
     padding: 12px 16px;
     display: flex;
     gap: 10px;
     align-items: flex-end;
-    z-index: 10;
 }
 
 .chat-input-wrapper {
@@ -497,7 +494,7 @@
 }
 
 /* =========================
-   Chat Screen Container
+   Chat Screen (Full Screen)
    ========================= */
 .chat-screen {
     position: fixed;
@@ -506,7 +503,7 @@
     right: 0;
     bottom: 0;
     background: white;
-    z-index: 1000;
+    z-index: 1000; /* Changed from 10000 - way too high */
     display: flex;
     flex-direction: column;
     animation: slideInUp 0.3s ease;
@@ -721,7 +718,7 @@
 }
 
 .msg-failed {
-    color: #ef4444;ko
+    color: #ef4444;
     opacity: 1;
     font-weight: 600;
 }
