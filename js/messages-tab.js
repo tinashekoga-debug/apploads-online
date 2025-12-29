@@ -18,18 +18,6 @@ import { updateUnreadBadge } from './chat-controller.js';
 const loadDataCache = new Map();
 
 // =========================
-// Render Debounce (anti-flicker)
-// =========================
-let renderTimeout = null;
-
-function scheduleRender(fn, delay = 60) {
-    if (renderTimeout) {
-        clearTimeout(renderTimeout);
-    }
-    renderTimeout = setTimeout(fn, delay);
-}
-
-// =========================
 // Render Messages Tab
 // =========================
 export async function renderMessagesTab() {
@@ -312,13 +300,8 @@ conversations.sort((a, b) => {
                     </div>
                 `;
             } else {
-               const previousScrollTop = listContainer.scrollTop;
-
-scheduleRender(() => {
-    listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
-    setupConversationListeners();
-    listContainer.scrollTop = previousScrollTop;
-});
+                listContainer.innerHTML = renderConversationsHTML(conversationsWithData);
+                setupConversationListeners();
             }
             
             // Update unread badge
