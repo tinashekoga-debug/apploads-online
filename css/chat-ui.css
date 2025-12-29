@@ -73,7 +73,8 @@
     height: 100%;
     background: #fafafa;
     overflow: hidden;
-    position: relative; /* ADD THIS - creates positioning context */
+    position: relative;
+    padding-bottom: 0; /* Ensure no padding at container level */
 }
 
 .chat-messages {
@@ -81,7 +82,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 200px; /* INCREASED - space for sticky input */
+    padding-bottom: 120px; /* INCREASED - space for sticky input */
     display: flex;
     flex-direction: column;
     gap: 12px;
