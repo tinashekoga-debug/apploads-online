@@ -80,7 +80,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 80px; /* RESTORE THIS - creates space for fixed input */
+    padding-bottom: 140px; /* RESTORE THIS - creates space for fixed input */
     display: flex;
     flex-direction: column;
     gap: 12px;
