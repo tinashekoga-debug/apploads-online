@@ -65,14 +65,15 @@
 }
 
 /* =========================
-   Messages Container - FIXED
+   Messages Container
    ========================= */
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1; /* ADD THIS - takes remaining space */
     background: #fafafa;
-    overflow: hidden; /* ADD THIS - prevents content overflow */
+    overflow: hidden;
+    position: relative; /* ADD THIS - creates positioning context */
 }
 
 .chat-messages {
@@ -80,7 +81,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 140px; /* RESTORE THIS - creates space for fixed input */
+    padding-bottom: 90px; /* Space for input - adjust as needed */
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -143,10 +144,10 @@
 }
 
 /* =========================
-   Message Input - FIXED (No Flicker)
+   Message Input - FIXED PROPERLY
    ========================= */
 .chat-input-container {
-    position: fixed; /* CHANGED from relative */
+    position: absolute; /* CHANGED from fixed */
     bottom: 0;
     left: 0;
     right: 0;
@@ -156,7 +157,7 @@
     display: flex;
     gap: 10px;
     align-items: flex-end;
-    z-index: 100; /* ADD THIS - ensures it stays on top */
+    z-index: 10;
 }
 
 .chat-input-wrapper {
@@ -496,7 +497,7 @@
 }
 
 /* =========================
-   Chat Screen (Full Screen)
+   Chat Screen Container
    ========================= */
 .chat-screen {
     position: fixed;
@@ -505,7 +506,7 @@
     right: 0;
     bottom: 0;
     background: white;
-    z-index: 1000; /* Changed from 10000 - way too high */
+    z-index: 1000;
     display: flex;
     flex-direction: column;
     animation: slideInUp 0.3s ease;
@@ -720,7 +721,7 @@
 }
 
 .msg-failed {
-    color: #ef4444;
+    color: #ef4444;ko
     opacity: 1;
     font-weight: 600;
 }
