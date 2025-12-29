@@ -78,14 +78,14 @@
 .chat-messages {
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden; /* ADD THIS */
+    overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 16px; /* REDUCED from 80px */
+    padding-bottom: 80px; /* ADD THIS - space for fixed input */
     display: flex;
     flex-direction: column;
     gap: 12px;
     -webkit-overflow-scrolling: touch;
-    min-height: 0; /* CRITICAL - allows flex item to shrink */
+    min-height: 0;
 }
 
 .chat-input {
@@ -171,14 +171,17 @@
    Message Input - FIXED
    ========================= */
 .chat-input-container {
-    position: relative; /* CHANGED from sticky */
-    flex-shrink: 0; /* ADD THIS - prevents input from shrinking */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: white;
     border-top: 1px solid #e5e7eb;
     padding: 12px 16px;
     display: flex;
     gap: 10px;
     align-items: flex-end;
+    z-index: 45; /* Below chat header (50) but above content */
 }
 
 /* =========================
