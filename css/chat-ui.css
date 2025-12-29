@@ -265,7 +265,7 @@
     cursor: pointer;
     transition: background 0.2s ease;
     align-items: flex-start;
-    gap: 12px;
+    gap: 0; /* Changed from 12px to remove gap */
 }
 
 .conversation-item:hover {
@@ -273,17 +273,7 @@
 }
 
 .conversation-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0b7d62, #20a58a);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 16px;
-    flex-shrink: 0;
+    display: none; /* Hide the avatar */
 }
 
 .conversation-content {

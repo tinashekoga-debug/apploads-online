@@ -167,7 +167,7 @@ function renderConversationItem(conv) {
     
     return `
         <div class="conversation-item" data-conversation-id="${escapeHtml(conv.id)}" data-load-id="${escapeHtml(conv.loadId)}">
-            <div class="conversation-avatar">${initial}</div>
+         <!-- Avatar removed -->
             <div class="conversation-content">
                 <div class="conversation-header">
                     <div class="conversation-title">${escapeHtml(title)}</div>
