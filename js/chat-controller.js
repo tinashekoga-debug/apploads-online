@@ -244,15 +244,7 @@ async function initializeChat(conversationId, loadData) {
         sendBtn.disabled = !this.value.trim();
     });
     
-    // Send on Enter
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendChatMessage();
-        }
-    });
-    
-    sendBtn.addEventListener('click', sendChatMessage);
+      sendBtn.addEventListener('click', sendChatMessage);
     backBtn.addEventListener('click', closeChatScreen);
     
     // Close on Escape

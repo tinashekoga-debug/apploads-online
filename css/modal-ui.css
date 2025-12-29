@@ -1,0 +1,219 @@
+/* ===========================================
+   ChatGPT-Style Confirm / Authorization Modal
+   Clean, calm, system UI
+   =========================================== */
+
+/* Backdrop */
+#confirmModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+
+#confirmModal.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#confirmModal.hidden {
+    display: none;
+}
+
+/* Dialog card */
+.confirm-dialog {
+    background: #ffffff;
+    width: 90%;
+    max-width: 340px;
+    border-radius: 16px;
+    padding: 22px 20px 20px;
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.25),
+        0 1px 2px rgba(0, 0, 0, 0.08);
+    transform: scale(0.96);
+    transition: transform 0.18s ease;
+}
+
+#confirmModal.show .confirm-dialog {
+    transform: scale(1);
+}
+
+/* Header (stacked, centered) */
+.confirm-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+/* Icon */
+.confirm-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+/* Icon states */
+.confirm-icon.danger {
+    background: #fde2e2;
+    color: #d32f2f;
+}
+
+.confirm-icon.warning {
+    background: #fff4d6;
+    color: #f57c00;
+}
+
+.confirm-icon.info {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.confirm-icon.success {
+    background: #e6f4ea;
+    color: #2e7d32;
+}
+
+/* Text */
+.confirm-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #111111;
+    margin: 0 0 6px 0;
+    line-height: 1.35;
+}
+
+.confirm-message {
+    font-size: 14px;
+    color: #444444;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.confirm-description {
+    font-size: 13px;
+    color: #777777;
+    margin-top: 6px;
+    line-height: 1.45;
+}
+
+/* Actions (vertical, primary first) */
+.confirm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Buttons */
+.confirm-actions .btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+
+/* Primary destructive */
+.confirm-actions .btn.danger {
+    background: #e53935;
+    color: #ffffff;
+}
+
+.confirm-actions .btn.danger:hover {
+    background: #d32f2f;
+}
+
+/* Warning primary */
+.confirm-actions .btn.warning {
+    background: #f57c00;
+    color: #ffffff;
+}
+
+.confirm-actions .btn.warning:hover {
+    background: #ef6c00;
+}
+
+/* Secondary */
+.confirm-actions .btn.secondary {
+    background: #f1f3f5;
+    color: #333333;
+}
+
+.confirm-actions .btn.secondary:hover {
+    background: #e9ecef;
+}
+
+/* Press feedback */
+.confirm-actions .btn:active {
+    transform: scale(0.97);
+}
+
+/* Accessibility */
+.confirm-actions .btn:focus {
+    outline: 2px solid #c7d2fe;
+    outline-offset: 2px;
+}
+
+/* Mobile tuning */
+@media (max-width: 480px) {
+    .confirm-dialog {
+        padding: 20px 18px 18px;
+    }
+
+    .confirm-title {
+        font-size: 16px;
+    }
+
+    .confirm-message {
+        font-size: 13.5px;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .confirm-dialog {
+        background: #1f2937;
+    }
+
+    .confirm-title {
+        color: #f9fafb;
+    }
+
+    .confirm-message {
+        color: #d1d5db;
+    }
+
+    .confirm-description {
+        color: #9ca3af;
+    }
+
+    .confirm-actions .btn.secondary {
+        background: #374151;
+        color: #e5e7eb;
+    }
+
+    .confirm-actions .btn.secondary:hover {
+        background: #4b5563;
+    }
+}
+
