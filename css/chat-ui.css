@@ -72,7 +72,8 @@
     flex-direction: column;
     height: 100%;
     background: #fafafa;
-    overflow: hidden; /* ADD THIS - prevents content overflow */
+    overflow: hidden;
+    position: relative; /* ADD THIS - creates positioning context */
 }
 
 .chat-messages {
@@ -80,12 +81,13 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
-    padding-bottom: 80px; /* ADD THIS - space for fixed input */
+    padding-bottom: 90px; /* Increased space for fixed input + breathing room */
     display: flex;
     flex-direction: column;
     gap: 12px;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
+    height: calc(100% - 70px); /* Subtract approximate input container height */
 }
 
 .chat-input {
