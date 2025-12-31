@@ -31,7 +31,6 @@ import { initializeSettingsDrawer } from './settings.js';
 // Add to your imports section
 import { setupMarketplaceReporting } from './marketplace-reporting.js';
 import { updateUnreadBadge } from './chat-controller.js';
-import { cleanupMessagesTab } from './messages-tab.js';
 import { setupMarketplaceFilters, clearMarketplaceFilters } from './marketplace-filters.js';
 import { showFeedbackForm } from './feedback.js';
 import { openListing } from './marketplace-listing.js';
@@ -50,6 +49,7 @@ import {
 
 // 3. DATA LOADER
 import { DataLoader } from './data-loader.js';
+import { setupAfiAI } from './ai-integration.js';
 
 // 4. EXTERNAL SERVICES LAST (Slow - network dependencies)
 import { trackEvent } from './firebase-config.js';
@@ -147,6 +147,9 @@ export const state = {
     isInitialLoad: true,
     countries: countries // ADD THIS LINE
 };
+
+// ✅ ADD THIS - Expose state to window for AI context
+window.appState = state;
 
 // =========================
 // PAGINATION STATE
@@ -457,6 +460,7 @@ if (filterCountryEl) {
   initializeSettingsDrawer(); // ADD THIS LINE
     // Add to initialization section (after auth initialization):
 initializeDataFramework();
+  setupAfiAI()
   setupReportFunctionality();
     setupMarketplaceReporting();
     
@@ -501,8 +505,6 @@ initializeDataFramework();
                 await loadUserProfile(user.uid);
                 await loadUserVotes(user.uid);
                 renderAccount();
-                // Update unread badge when user signs in
-                updateUnreadBadge();
             } catch (e) {
                 console.error('Error loading user data:', e);
             }
@@ -510,11 +512,6 @@ initializeDataFramework();
             console.log('❌ No user authenticated');
             state.profile = null;
             state.myVotes = {};
-            
-            // Cleanup messages listener when user signs out
-            const { cleanupMessagesTab } = await import('./messages-tab.js');
-            cleanupMessagesTab();
-            
             renderAccount();
         }
     });
