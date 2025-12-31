@@ -44,33 +44,35 @@ export function enableSwipeTabs() {
     let isVerticalScroll = false;
     
     function syncActiveButton(index) {
-    document.querySelectorAll('.account-tab-btn-enhanced').forEach((b) => b.classList.remove('active'));
-    const targets = ['myMessagesSection', 'myLoadsSection', 'mySalesSection'];
-    const btn = document.querySelector(`.account-tab-btn-enhanced[data-target="${targets[index]}"]`);
-    if (btn) btn.classList.add('active');
+    const allTabs = document.querySelectorAll('.account-tab-btn-enhanced');
     
-    // Update indicator dots - always show which section we're on
+    // Remove active class from all
+    allTabs.forEach(b => b.classList.remove('active'));
+    
+    // Update indicator dots
     document.querySelectorAll('.indicator-dot').forEach((dot, i) => {
         dot.classList.toggle('active', i === index);
     });
     
-    // Update tab visibility based on current section
-    const allTabs = document.querySelectorAll('.account-tab-btn-enhanced');
+    // Logic for showing tabs based on current section
     if (index === 0) {
         // Messages section: show Messages + My Loads
         allTabs[0].style.display = '';  // Messages
         allTabs[1].style.display = '';  // My Loads
         allTabs[2].style.display = 'none';  // Marketplace hidden
+        allTabs[0].classList.add('active');  // Activate Messages
     } else if (index === 1) {
         // My Loads section: show Messages + My Loads
         allTabs[0].style.display = '';  // Messages
         allTabs[1].style.display = '';  // My Loads
         allTabs[2].style.display = 'none';  // Marketplace hidden
+        allTabs[1].classList.add('active');  // Activate My Loads
     } else if (index === 2) {
-        // Marketplace section: show My Loads + Marketplace
-        allTabs[0].style.display = 'none';  // Messages hidden
-        allTabs[1].style.display = '';  // My Loads
-        allTabs[2].style.display = '';  // Marketplace
+        // Marketplace section: show Messages + Marketplace
+        allTabs[0].style.display = '';  // Messages (always visible!)
+        allTabs[1].style.display = 'none';  // My Loads hidden
+        allTabs[2].style.display = '';  // Marketplace visible
+        allTabs[2].classList.add('active');  // Activate Marketplace
     }
 }
 

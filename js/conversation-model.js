@@ -1,4 +1,3 @@
-
 // ===========================================
 // conversation-model.js
 // ===========================================
@@ -6,7 +5,7 @@
 // Optimized for free-tier usage
 // ===========================================
 
-import { db, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp } from './firebase-config.js';
+import { db, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, serverTimestamp, increment } from './firebase-config.js';
 
 // =========================
 // Generate Deterministic Conversation ID
@@ -71,48 +70,34 @@ export async function sendMessage(conversationId, senderUid, text) {
     // Add message
     await setDoc(doc(messagesRef, messageId), messageData);
     
-    // Update conversation metadata
-    const conversationRef = doc(db, 'conversations', conversationId);
-    const conversationDoc = await getDoc(conversationRef);
-    
-    if (conversationDoc.exists()) {
-        const conversationData = conversationDoc.data();
-        const participants = conversationData.participants || [];
+   // Update conversation metadata (do this after message is saved)
+    try {
+        const conversationRef = doc(db, 'conversations', conversationId);
+        const conversationDoc = await getDoc(conversationRef);
         
-        // Increment unread count for all participants except sender
-        const unreadCount = { ...conversationData.unreadCount };
-        participants.forEach(participant => {
-            if (participant !== senderUid) {
-                unreadCount[participant] = (unreadCount[participant] || 0) + 1;
-            }
-        });
-        
-        await setDoc(conversationRef, {
-            lastMessage: text.trim(),
-            lastMessageAt: serverTimestamp(),
-            unreadCount,
-            updatedAt: serverTimestamp()
-        }, { merge: true });
+        if (conversationDoc.exists()) {
+            const conversationData = conversationDoc.data();
+            const participants = conversationData.participants || [];
+            
+            // Increment unread count for all participants except sender
+            const unreadCount = { ...conversationData.unreadCount };
+            participants.forEach(participant => {
+                if (participant !== senderUid) {
+                    unreadCount[participant] = (unreadCount[participant] || 0) + 1;
+                }
+            });
+            
+            await setDoc(conversationRef, {
+                lastMessage: text.trim(),
+                lastMessageAt: serverTimestamp(),
+                unreadCount,
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        }
+    } catch (error) {
+        console.error('Error updating conversation metadata:', error);
+        // Don't throw - message was already sent successfully
     }
-}
-
-// =========================
-// Get User's Conversations
-// =========================
-export async function getUserConversations(userUid) {
-    const conversationsRef = collection(db, 'conversations');
-    const q = query(
-        conversationsRef,
-        where('participants', 'array-contains', userUid),
-        orderBy('lastMessageAt', 'desc'),
-        limit(50)
-    );
-    
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
 }
 
 // =========================
@@ -122,17 +107,15 @@ export async function getMessages(conversationId, limitCount = 50) {
     const messagesRef = collection(db, 'conversations', conversationId, 'messages');
     const q = query(
         messagesRef,
-        orderBy('createdAt', 'desc'),
+        orderBy('createdAt', 'asc'), // Match real-time listener ordering
         limit(limitCount)
     );
     
     const snapshot = await getDocs(q);
-    return snapshot.docs
-        .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }))
-        .reverse(); // Show oldest first
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
 }
 
 // =========================
@@ -151,6 +134,29 @@ export async function markConversationAsRead(conversationId, userUid) {
             unreadCount,
             updatedAt: serverTimestamp()
         }, { merge: true });
+    }
+}
+
+// =========================
+// Get User's Conversations
+// =========================
+export async function getUserConversations(userUid) {
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+        conversationsRef,
+        where('participants', 'array-contains', userUid),
+        orderBy('lastMessageAt', 'desc')
+    );
+    
+    try {
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Error fetching conversations:', error);
+        return [];
     }
 }
 

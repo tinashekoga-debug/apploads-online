@@ -31,6 +31,7 @@ import { initializeSettingsDrawer } from './settings.js';
 // Add to your imports section
 import { setupMarketplaceReporting } from './marketplace-reporting.js';
 import { updateUnreadBadge } from './chat-controller.js';
+import { cleanupMessagesTab } from './messages-tab.js';
 import { setupMarketplaceFilters, clearMarketplaceFilters } from './marketplace-filters.js';
 import { showFeedbackForm } from './feedback.js';
 import { openListing } from './marketplace-listing.js';
@@ -147,9 +148,6 @@ export const state = {
     isInitialLoad: true,
     countries: countries // ADD THIS LINE
 };
-
-// ✅ ADD THIS - Expose state to window for AI context
-window.appState = state;
 
 // =========================
 // PAGINATION STATE
@@ -505,6 +503,8 @@ initializeDataFramework();
                 await loadUserProfile(user.uid);
                 await loadUserVotes(user.uid);
                 renderAccount();
+                // Update unread badge when user signs in
+                updateUnreadBadge();
             } catch (e) {
                 console.error('Error loading user data:', e);
             }
@@ -512,6 +512,11 @@ initializeDataFramework();
             console.log('❌ No user authenticated');
             state.profile = null;
             state.myVotes = {};
+            
+            // Cleanup messages listener when user signs out
+            const { cleanupMessagesTab } = await import('./messages-tab.js');
+            cleanupMessagesTab();
+            
             renderAccount();
         }
     });

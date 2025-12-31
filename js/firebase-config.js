@@ -12,7 +12,8 @@ import {
   persistentMultipleTabManager,
   collection, doc, setDoc, getDoc, getDocs,
   deleteDoc, query, orderBy, where, updateDoc, increment,
-  serverTimestamp, limit, startAfter
+  serverTimestamp, limit, startAfter,
+  onSnapshot  // <-- ADDED THIS
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // --- Authentication ---
@@ -36,7 +37,7 @@ import { getAnalytics, logEvent } from 'https://www.gstatic.com/firebasejs/10.7.
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVmRSQLBi2PESf1Tj43-t0x64lki-H0dU",
-  authDomain: "apploads-online.firebaseapp.com",  // ← CHANGE THIS LINE
+  authDomain: "apploads-online.web.app",
   projectId: "apploads-online",
   storageBucket: "apploads-online.firebasestorage.app",
   messagingSenderId: "912753061359",
@@ -113,5 +114,6 @@ export {
   increment,
   serverTimestamp,
   limit,
-  startAfter
+  startAfter,
+  onSnapshot  // <-- ADDED THIS TO EXPORTS
 };

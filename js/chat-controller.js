@@ -1,8 +1,7 @@
 // ===========================================
-// chat-controller.js
+// chat-controller.js - ACTUALLY FIXED NOW
 // ===========================================
-// Main controller for chat functionality
-// Handles opening chats, sending messages, and real-time updates
+// Fixed: Messages now persist and sync properly
 // ===========================================
 
 import { state } from './main.js';
@@ -18,15 +17,15 @@ import {
 
 // Real-time listeners cache
 let messageListeners = new Map();
+let currentMessages = [];
+let currentConversationId = null;
 
 // =========================
 // Open Chat from Load Card
 // =========================
 export async function openLoadChat(loadData) {
     if (!state.currentUser) {
-        // Show sign-in modal
         authOpen('signin', () => {
-            // Retry after sign-in
             if (state.currentUser) {
                 openLoadChat(loadData);
             }
@@ -34,12 +33,9 @@ export async function openLoadChat(loadData) {
         return;
     }
     
-    // Create or get conversation
     try {
         const ownerUid = loadData.owner || loadData.ownerKey || 'unknown';
         const conversationId = await createConversation(loadData.id, state.currentUser.uid, ownerUid);
-        
-        // Open chat screen
         openChatScreen(conversationId, loadData);
     } catch (error) {
         console.error('Error opening chat:', error);
@@ -50,8 +46,10 @@ export async function openLoadChat(loadData) {
 // =========================
 // Open Chat Screen
 // =========================
-export function openChatScreen(conversationId, loadData = null) {
-    // Create chat screen HTML
+export async function openChatScreen(conversationId, loadData = null) {
+    currentConversationId = conversationId;
+    currentMessages = []; // Reset messages
+    
     const chatHTML = `
         <div class="chat-screen" id="chatScreen">
             <div class="chat-screen-header">
@@ -67,7 +65,7 @@ export function openChatScreen(conversationId, loadData = null) {
             
             <div class="chat-container">
                 <div class="chat-messages" id="chatMessages">
-                    <div class="loading-message">Loading messages...</div>
+                    <!-- Messages load instantly -->
                 </div>
                 
                 <div class="chat-input-container">
@@ -89,16 +87,20 @@ export function openChatScreen(conversationId, loadData = null) {
         </div>
     `;
     
-    // Add to body
     const overlay = document.createElement('div');
     overlay.className = 'chat-overlay';
     overlay.innerHTML = chatHTML;
     document.body.appendChild(overlay);
     
-    // Initialize chat
+   // Mark as read IMMEDIATELY (optimistic update)
+    markAsReadOptimistic(conversationId);
+    
+    // Load existing messages first, then setup listener
+    await loadInitialMessages(conversationId);
+    
     initializeChat(conversationId, loadData);
 }
-
+    
 // =========================
 // Render Load Header
 // =========================
@@ -124,6 +126,52 @@ function renderLoadHeader(loadData) {
 }
 
 // =========================
+// Mark as Read (Optimistic)
+// =========================
+function markAsReadOptimistic(conversationId) {
+    if (!state.currentUser) return;
+    
+    // Update badge IMMEDIATELY
+    const badge = document.querySelector('.tab-count-badge.unread');
+    if (badge) {
+        badge.style.display = 'none';
+    }
+    
+    // Also remove unread indicator from conversation item
+    const convItem = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+    if (convItem) {
+        const unreadDot = convItem.querySelector('.conversation-unread');
+        if (unreadDot) {
+            unreadDot.remove();
+        }
+    }
+    
+    // Then update Firestore in background (debounced)
+    clearTimeout(window._markReadTimeout);
+    window._markReadTimeout = setTimeout(() => {
+        markConversationAsRead(conversationId, state.currentUser.uid)
+            .then(() => updateUnreadBadge())
+            .catch(err => console.error('Failed to mark as read:', err));
+    }, 1000);
+}
+    
+    // =========================
+    // Load Initial Messages
+    // =========================
+async function loadInitialMessages(conversationId) {
+    try {
+        const messages = await getMessages(conversationId);
+        currentMessages = messages.map(msg => ({
+            id: msg.id,
+            ...msg
+        }));
+    } catch (error) {
+        console.error('Error loading initial messages:', error);
+        currentMessages = [];
+    }
+}
+    
+// =========================
 // Initialize Chat
 // =========================
 async function initializeChat(conversationId, loadData) {
@@ -134,75 +182,58 @@ async function initializeChat(conversationId, loadData) {
     
     if (!messagesContainer || !input || !sendBtn || !backBtn) return;
     
-    let messages = [];
+    // Show empty state immediately
+    messagesContainer.innerHTML = `
+        <div class="empty-conversations">
+            <div class="empty-conversations-icon"></div>
+            <h3>Start a conversation</h3>
+            <p>Send a message about this post</p>
+        </div>
+    `;
     
-    // Load existing messages
-    async function loadChatMessages() {
-        try {
-            messages = await getMessages(conversationId);
-            renderMessages();
-            
-            // Mark as read
-            if (state.currentUser) {
-                await markConversationAsRead(conversationId, state.currentUser.uid);
-                updateUnreadBadge();
-            }
-        } catch (error) {
-            console.error('Error loading messages:', error);
-            messagesContainer.innerHTML = '<div class="error-message">Failed to load messages</div>';
-        }
-    }
+    // Setup real-time listener FIRST (this will update currentMessages)
+    setupMessageListener(conversationId, messagesContainer);
     
-    // Render messages
-    function renderMessages() {
-        if (messages.length === 0) {
-            messagesContainer.innerHTML = `
-                <div class="empty-conversations">
-                    <div class="empty-conversations-icon">💬</div>
-                    <h3>Start a conversation</h3>
-                    <p>Send a message about this load</p>
-                </div>
-            `;
-            return;
-        }
-        
-        messagesContainer.innerHTML = messages.map(msg => `
-            <div class="message-bubble ${msg.senderId === state.currentUser?.uid ? 'message-sent' : 'message-received'}">
-                <div class="message-text">${escapeHtml(msg.text)}</div>
-                <div class="message-timestamp">${formatMessageTime(msg.createdAt)}</div>
-            </div>
-        `).join('');
-        
-        // Scroll to bottom
-        setTimeout(() => {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }, 100);
-    }
-    
-    // Format timestamp
-    function formatMessageTime(timestamp) {
-        if (!timestamp) return '';
-        
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    
-    // Send message
+    // Send message handler
     async function sendChatMessage() {
         const text = input.value.trim();
         if (!text || !state.currentUser) return;
         
+        // Optimistic update - add message immediately to UI
+        const optimisticMsg = {
+            id: `temp_${Date.now()}`,
+            senderId: state.currentUser.uid,
+            text: text,
+            createdAt: new Date(),
+            _sending: true
+        };
+        
+        // Add to current messages and render
+        currentMessages.push(optimisticMsg);
+        renderMessages(messagesContainer);
+        
+        // Clear input
+        input.value = '';
+        input.style.height = 'auto';
+        sendBtn.disabled = true;
+        
         try {
+            // Send to Firestore (real-time listener will update automatically)
             await sendMessage(conversationId, state.currentUser.uid, text);
-            input.value = '';
-            input.style.height = 'auto';
-            sendBtn.disabled = true;
             
-            // Reload messages
-            await loadChatMessages();
+            // Don't remove optimistic message - listener will replace it with real one
+            
         } catch (error) {
             console.error('Error sending message:', error);
             showToast('Failed to send message', 'error');
+            
+            // Mark as failed instead of removing
+            const msg = currentMessages.find(m => m.id === optimisticMsg.id);
+            if (msg) {
+                msg._failed = true;
+                delete msg._sending;
+                renderMessages(messagesContainer);
+            }
         }
     }
     
@@ -213,62 +244,150 @@ async function initializeChat(conversationId, loadData) {
         sendBtn.disabled = !this.value.trim();
     });
     
-    // Send on Enter (Shift+Enter for new line)
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendChatMessage();
-        }
-    });
-    
-    // Button events
-    sendBtn.addEventListener('click', sendChatMessage);
+      sendBtn.addEventListener('click', sendChatMessage);
     backBtn.addEventListener('click', closeChatScreen);
     
     // Close on Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeChatScreen();
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') closeChatScreen();
+    };
+    document.addEventListener('keydown', escapeHandler);
+    
+    // Cleanup
+    messagesContainer._cleanupEscape = () => {
+        document.removeEventListener('keydown', escapeHandler);
+    };
+}
+
+// =========================
+// Render Messages
+// =========================
+function renderMessages(container) {
+    if (currentMessages.length === 0) {
+        container.innerHTML = `
+            <div class="empty-conversations">
+                <div class="empty-conversations-icon"></div>
+                <h3>Start a conversation</h3>
+                <p>Send a message about this post</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const wasScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+    
+    // Group messages by date
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    let html = '';
+    let lastDate = null;
+    
+    currentMessages.forEach(msg => {
+        const msgDate = msg.createdAt?.toDate ? 
+            msg.createdAt.toDate().toDateString() : 
+            new Date(msg.createdAt || Date.now()).toDateString();
+        
+        // Add date separator if date changed
+        if (msgDate !== lastDate) {
+            let dateLabel;
+            if (msgDate === today) dateLabel = 'Today';
+            else if (msgDate === yesterday) dateLabel = 'Yesterday';
+            else {
+                const date = new Date(msgDate);
+                dateLabel = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: new Date().getFullYear() !== date.getFullYear() ? 'numeric' : undefined
+                });
+            }
+            
+            html += `<div class="chat-date-separator">${escapeHtml(dateLabel)}</div>`;
+            lastDate = msgDate;
         }
+        
+        const isSent = msg.senderId === state.currentUser?.uid;
+        const statusIcon = msg._sending ? `<span class="msg-status">⏱️</span>` : 
+                          msg._failed ? `<span class="msg-status msg-failed">❌ Failed</span>` : '';
+        
+        html += `
+            <div class="message-bubble ${isSent ? 'message-sent' : 'message-received'}">
+                <div class="message-text">${escapeHtml(msg.text)}</div>
+                <div class="message-timestamp">
+                    ${formatMessageTime(msg.createdAt)}
+                    ${statusIcon}
+                </div>
+            </div>
+        `;
     });
     
-    // Initial load
-    await loadChatMessages();
+    container.innerHTML = html;
     
-    // Setup real-time listener
-    setupMessageListener(conversationId);
+    // Auto-scroll if user was at bottom
+    if (wasScrolledToBottom) {
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 0);
+    }
+}
+
+// =========================
+// Format Timestamp
+// =========================
+function formatMessageTime(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+    
+    // =========================
+// Get Timestamp (helper)
+// =========================
+function getTimestamp(timestamp) {
+    if (!timestamp) return 0;
+    if (timestamp.toDate) return timestamp.toDate().getTime();
+    if (timestamp instanceof Date) return timestamp.getTime();
+    return new Date(timestamp).getTime();
 }
 
 // =========================
 // Setup Real-time Listener
 // =========================
-function setupMessageListener(conversationId) {
+function setupMessageListener(conversationId, container) {
     // Clean up existing listener
     if (messageListeners.has(conversationId)) {
         messageListeners.get(conversationId)();
     }
     
-    // Import Firestore onSnapshot here to avoid initial bundle size
-    import('./firebase-config.js').then(({ db, collection, query, orderBy, limit, onSnapshot }) => {
+    import('./firebase-config.js').then(({ db, collection, query, orderBy, onSnapshot }) => {
         const messagesRef = collection(db, 'conversations', conversationId, 'messages');
-        const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
+        const q = query(messagesRef, orderBy('createdAt', 'asc'));
         
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            if (!snapshot.empty) {
-                // New message received
-                const newMsg = snapshot.docs[0].data();
-                if (newMsg.senderId !== state.currentUser?.uid) {
-                    // Mark as read if user is viewing the chat
-                    markConversationAsRead(conversationId, state.currentUser.uid);
-                    updateUnreadBadge();
-                    
-                    // Reload messages
-                    const messagesContainer = document.getElementById('chatMessages');
-                    if (messagesContainer) {
-                        initializeChat(conversationId);
-                    }
-                }
-            }
+            // Get all messages from Firestore
+            const firestoreMessages = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Keep only optimistic messages that don't match any Firestore message
+            // Match by text AND senderId AND timestamp within 5 seconds
+            const optimisticMessages = currentMessages.filter(m => {
+                if (!m.id.startsWith('temp_')) return false;
+                
+                return !firestoreMessages.some(fm => 
+                    fm.text === m.text && 
+                    fm.senderId === m.senderId &&
+                    Math.abs(getTimestamp(fm.createdAt) - getTimestamp(m.createdAt)) < 5000
+                );
+            });
+            
+            // Combine: Firestore messages + remaining optimistic messages
+            currentMessages = [...firestoreMessages, ...optimisticMessages];
+            
+            renderMessages(container);
+        }, (error) => {
+            console.error('Message listener error:', error);
         });
         
         messageListeners.set(conversationId, unsubscribe);
@@ -279,22 +398,29 @@ function setupMessageListener(conversationId) {
 // Close Chat Screen
 // =========================
 export function closeChatScreen() {
-    // Clean up all listeners
     messageListeners.forEach(unsubscribe => unsubscribe());
     messageListeners.clear();
     
-    // Remove chat screen
-    const chatScreen = document.getElementById('chatScreen');
-    const overlay = document.querySelector('.chat-overlay');
+    const messagesContainer = document.getElementById('chatMessages');
+    if (messagesContainer?._cleanupEscape) {
+        messagesContainer._cleanupEscape();
+    }
     
-    if (chatScreen) {
-        chatScreen.style.animation = 'slideOutDown 0.3s ease';
+    const overlay = document.querySelector('.chat-overlay');
+    if (overlay) {
+        const chatScreen = overlay.querySelector('.chat-screen');
+        if (chatScreen) {
+            chatScreen.style.animation = 'slideOutDown 0.3s ease';
+        }
         setTimeout(() => {
-            if (overlay && overlay.parentNode) {
+            if (overlay.parentNode) {
                 overlay.parentNode.removeChild(overlay);
             }
         }, 300);
     }
+    
+    currentMessages = [];
+    currentConversationId = null;
 }
 
 // =========================
@@ -320,8 +446,5 @@ export async function updateUnreadBadge() {
     }
 }
 
-// =========================
-// Export for Load Cards
-// =========================
+// Export for load cards
 window.openLoadChat = openLoadChat;
-

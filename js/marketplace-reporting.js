@@ -1,247 +1,385 @@
 // ===========================================
 // marketplace-reporting.js
 // ===========================================
-// Handles marketplace-specific reporting functionality
+// Beautiful, elegant marketplace item reporting
+// Matches app's WhatsApp-style drawer design
 // ===========================================
 
+import { state } from './main.js';
+import { db, doc, setDoc, collection } from './firebase-config.js';
 import { trackEvent } from './firebase-config.js';
-import { doc, setDoc, serverTimestamp } from './firebase-config.js';
-import { db } from './main.js';
 import { showToast } from './ui.js';
-import { authOpen } from './auth.js'; // ADD THIS IMPORT TOO
+import { authOpen } from './auth.js';
 
-// Marketplace-specific reporting reasons
-const MARKETPLACE_REPORT_REASONS = {
-    'scam_fraud': 'Scam or fraudulent listing',
-    'wrong_category': 'Wrong category',
-    'prohibited_item': 'Prohibited or illegal item',
-    'fake_images': 'Fake or stolen images',
-    'price_misleading': 'Price is misleading',
-    'contact_issues': "Can't contact seller",
-    'sold_available': 'Already sold but still listed',
-    'spam': 'Spam or duplicate listing',
-    'harassment': 'Harassment or inappropriate behavior',
-    'other': 'Other reason'
-};
+// Report reasons with clear, helpful descriptions
+const REPORT_REASONS = [
+    {
+        id: 'spam',
+        label: 'Spam or Misleading',
+        description: 'Repetitive posts, fake listings, or misleading information'
+    },
+    {
+        id: 'inappropriate',
+        label: 'Inappropriate Content',
+        description: 'Offensive, illegal, or inappropriate material'
+    },
+    {
+        id: 'scam',
+        label: 'Scam or Fraud',
+        description: 'Suspicious activity, fake contact info, or fraudulent listing'
+    },
+    {
+        id: 'wrong_category',
+        label: 'Wrong Category',
+        description: 'Item posted in incorrect category'
+    },
+    {
+        id: 'sold',
+        label: 'Already Sold/Taken',
+        description: 'Item is no longer available but still listed'
+    },
+    {
+        id: 'duplicate',
+        label: 'Duplicate Listing',
+        description: 'Same item posted multiple times'
+    },
+    {
+        id: 'other',
+        label: 'Other Issue',
+        description: 'Something else that violates our guidelines'
+    }
+];
 
 class MarketplaceReporting {
     constructor() {
         this.currentListing = null;
+        this.drawer = null;
+        this.backdrop = null;
         this.selectedReasons = new Set();
         this.init();
     }
 
     init() {
-        this.createReportModal();
+        this.createDrawer();
         this.bindEvents();
     }
 
-    createReportModal() {
-        // Check if modal already exists
-        if (document.getElementById('marketplaceReportModal')) return;
+    createDrawer() {
+        // Check if already exists
+        if (document.getElementById('reportDrawer')) {
+            this.drawer = document.getElementById('reportDrawer');
+            this.backdrop = document.getElementById('reportBackdrop');
+            return;
+        }
 
-        const modalHTML = `
-            <div id="marketplaceReportModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 style="margin:0">Report Listing</h3>
-                        <button class="modal-close" data-action="close-report-modal">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="M18 6L6 18M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
+        // Create backdrop
+        this.backdrop = document.createElement('div');
+        this.backdrop.id = 'reportBackdrop';
+        this.backdrop.className = 'drawer-backdrop';
+        document.body.appendChild(this.backdrop);
+
+        // Create drawer
+        this.drawer = document.createElement('div');
+        this.drawer.id = 'reportDrawer';
+        this.drawer.className = 'bottom-sheet-drawer report-drawer hidden';
+        
+        this.drawer.innerHTML = `
+            <div class="drawer-drag-handle">
+                <div class="drag-handle-pill"></div>
+            </div>
+            
+            <div class="drawer-content">
+                <div class="report-header">
+                    <h3 class="report-title">Report Listing</h3>
+                    <p class="report-subtitle">Help us keep AppLoads safe and trustworthy</p>
+                </div>
+
+                <div class="report-listing-preview" id="reportListingPreview">
+                    <!-- Listing info will be inserted here -->
+                </div>
+
+                <div class="report-reasons-section">
+                    <h4 class="section-label">Why are you reporting this?</h4>
+                    <p class="section-hint">Select all that apply</p>
                     
-                    <div class="modal-body">
-                        <div class="report-listing-info" id="reportListingInfo" style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px;">
-                            <strong id="reportItemTitle"></strong>
-                            <div class="muted" id="reportItemDetails" style="margin-top: 4px; font-size: 0.9rem;"></div>
-                        </div>
+                    <div class="report-reasons-list" id="reportReasonsList">
+                        ${REPORT_REASONS.map(reason => `
+                            <label class="report-reason-item" data-reason="${reason.id}">
+                                <input type="checkbox" value="${reason.id}" style="display: none;">
+                                <span class="reason-checkbox">
+                                    <svg class="checkbox-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </span>
+                                <div class="reason-content">
+                                    <div class="reason-label">${reason.label}</div>
+                                    <div class="reason-description">${reason.description}</div>
+                                </div>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
 
-                        <div class="report-section">
-                            <h4 style="margin: 0 0 12px 0; font-size: 1rem;">Why are you reporting this listing?</h4>
-                            <p class="muted" style="margin: 0 0 16px 0; font-size: 0.9rem;">Select all that apply</p>
-                            
-                            <div class="report-reasons-list">
-                                ${Object.entries(MARKETPLACE_REPORT_REASONS).map(([key, label]) => `
-                                    <label class="report-reason-item">
-                                        <input type="checkbox" name="reportReason" value="${key}" />
-                                        <span class="checkmark"></span>
-                                        <span class="reason-label">${label}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-
-                        <div class="report-section" id="otherReasonSection" style="display: none; margin-top: 16px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Please provide more details</label>
-                            <textarea id="otherReasonDetails" placeholder="Please describe the issue..." rows="3" style="width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 8px; resize: vertical;"></textarea>
-                        </div>
-
-                        <div class="modal-actions" style="margin-top: 20px;">
-                            <button class="btn secondary" data-action="cancel-report">Cancel</button>
-                            <button class="btn warning" data-action="submit-report" disabled>Submit Report</button>
-                        </div>
+                <div class="report-details-section">
+                    <h4 class="section-label">Additional Details (Optional)</h4>
+                    <textarea 
+                        id="reportDetails" 
+                        class="report-textarea" 
+                        placeholder="Provide any additional information that might help us review this report..."
+                        maxlength="500"
+                    ></textarea>
+                    <div class="char-counter">
+                        <span id="reportCharCount">0</span>/500
                     </div>
                 </div>
             </div>
+
+            <div class="drawer-footer sticky-bottom">
+                <button class="btn-secondary" data-action="cancel-report">Cancel</button>
+                <button class="btn-primary" data-action="submit-report">Submit Report</button>
+            </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        this.bindModalEvents();
+        document.body.appendChild(this.drawer);
     }
 
     bindEvents() {
-        // Global event listener for report buttons
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#reportBtn')) {
-                this.openReportModal();
+        // Backdrop click to close
+        this.backdrop.addEventListener('click', () => this.closeDrawer());
+
+        // Reason selection
+        this.drawer.addEventListener('click', (e) => {
+            const reasonItem = e.target.closest('.report-reason-item');
+            if (reasonItem) {
+                e.preventDefault();
+                this.toggleReason(reasonItem);
+            }
+        });
+
+        // Character counter
+        const textarea = this.drawer.querySelector('#reportDetails');
+        const charCount = this.drawer.querySelector('#reportCharCount');
+        if (textarea && charCount) {
+            textarea.addEventListener('input', () => {
+                charCount.textContent = textarea.value.length;
+            });
+        }
+
+        // Action buttons
+        this.drawer.addEventListener('click', (e) => {
+            const action = e.target.closest('[data-action]')?.dataset.action;
+            
+            if (action === 'cancel-report') {
+                this.closeDrawer();
+            } else if (action === 'submit-report') {
+                this.submitReport();
+            }
+        });
+
+        // Swipe down to close (mobile)
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        const dragHandle = this.drawer.querySelector('.drawer-drag-handle');
+        
+        dragHandle.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        });
+
+        dragHandle.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - startY;
+            
+            if (deltaY > 0) {
+                this.drawer.style.transform = `translateY(${deltaY}px)`;
+            }
+        });
+
+        dragHandle.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const deltaY = currentY - startY;
+            
+            if (deltaY > 100) {
+                this.closeDrawer();
+            } else {
+                this.drawer.style.transform = '';
             }
         });
     }
 
-    bindModalEvents() {
-        const modal = document.getElementById('marketplaceReportModal');
-        if (!modal) return;
+    toggleReason(reasonItem) {
+        const checkbox = reasonItem.querySelector('input[type="checkbox"]');
+        const reasonId = reasonItem.dataset.reason;
 
-        // Close buttons
-        modal.querySelector('[data-action="close-report-modal"]').addEventListener('click', () => this.closeReportModal());
-        modal.querySelector('[data-action="cancel-report"]').addEventListener('click', () => this.closeReportModal());
+        if (this.selectedReasons.has(reasonId)) {
+            this.selectedReasons.delete(reasonId);
+            reasonItem.classList.remove('selected');
+            checkbox.checked = false;
+        } else {
+            this.selectedReasons.add(reasonId);
+            reasonItem.classList.add('selected');
+            checkbox.checked = true;
+        }
 
-        // Reason checkboxes
-        modal.querySelectorAll('input[name="reportReason"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => this.handleReasonChange(e.target));
+        console.log('📋 Selected reasons:', Array.from(this.selectedReasons));
+    }
+
+    openDrawer(listing) {
+        if (!listing) {
+            console.error('❌ No listing provided to report');
+            return;
+        }
+
+        // Check if user is logged in
+        if (!state?.currentUser) {
+            if (typeof authOpen === 'function') {
+                authOpen();
+            }
+            return;
+        }
+
+        this.currentListing = listing;
+        this.selectedReasons.clear();
+
+        // Populate listing preview
+        this.populateListingPreview(listing);
+
+        // Reset form
+        this.resetForm();
+
+        // Show drawer
+        this.drawer.classList.remove('hidden');
+        this.backdrop.classList.add('active');
+        document.body.classList.add('drawer-open');
+
+        // Animate in
+        setTimeout(() => {
+            this.drawer.classList.add('open');
+        }, 10);
+
+        trackEvent('report_drawer_opened', {
+            item_id: listing.id,
+            item_type: 'marketplace'
+        });
+    }
+
+    closeDrawer() {
+        this.drawer.classList.remove('open');
+        this.backdrop.classList.remove('active');
+        document.body.classList.remove('drawer-open');
+
+        setTimeout(() => {
+            this.drawer.classList.add('hidden');
+            this.drawer.style.transform = '';
+            this.currentListing = null;
+            this.selectedReasons.clear();
+        }, 300);
+    }
+
+    populateListingPreview(listing) {
+        const preview = this.drawer.querySelector('#reportListingPreview');
+        if (!preview) return;
+
+        const images = Array.isArray(listing.images) ? listing.images : 
+                      (listing.image ? [listing.image] : []);
+        const firstImage = images[0] || '';
+
+        preview.innerHTML = `
+            <div class="preview-card">
+                ${firstImage ? `
+                    <img src="${firstImage}" alt="${listing.title}" class="preview-image">
+                ` : `
+                    <div class="preview-image-placeholder">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                    </div>
+                `}
+                <div class="preview-info">
+                    <div class="preview-title">${listing.title || 'Untitled'}</div>
+                    <div class="preview-meta">
+                        <span>${listing.city || 'Unknown'}, ${listing.country || 'Unknown'}</span>
+                        ${listing.price ? `<span class="preview-price">${listing.currency || 'USD'} ${listing.price}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    resetForm() {
+        // Clear checkboxes
+        this.drawer.querySelectorAll('.report-reason-item').forEach(item => {
+            item.classList.remove('selected');
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = false;
         });
 
-        // Other reason textarea
-        const otherTextarea = modal.querySelector('#otherReasonDetails');
-        if (otherTextarea) {
-            otherTextarea.addEventListener('input', () => this.validateForm());
-        }
-
-        // Submit button
-        modal.querySelector('[data-action="submit-report"]').addEventListener('click', () => this.submitReport());
-    }
-
-    openReportModal(listingData = null) {
-    // Check if user is logged in
-    if (!window.state?.currentUser) {
-        showToast('Please sign in to report listings', 'warning');
-        
-        // Open auth modal instead
-        if (typeof authOpen === 'function') {
-            authOpen();
-        }
-        return;
-    }
-
-    if (listingData) {
-        this.currentListing = listingData;
-    } else if (window.marketplaceListing && window.marketplaceListing.currentListing) {
-        this.currentListing = window.marketplaceListing.currentListing;
-    } else {
-        console.error('No listing data available for reporting');
-        showToast('Unable to report this listing', 'error');
-        return;
-    }
-
-    // Populate listing info
-    const titleEl = document.getElementById('reportItemTitle');
-    const detailsEl = document.getElementById('reportItemDetails');
-    
-    if (titleEl) titleEl.textContent = this.currentListing.title || 'Unknown Listing';
-    if (detailsEl) {
-        const location = `${this.currentListing.city || ''}, ${this.currentListing.country || ''}`.replace(/^, |, $/g, '');
-        const price = this.currentListing.price ? `• ${this.currentListing.price} ${this.currentListing.currency || ''}` : '';
-        detailsEl.textContent = `${location} ${price}`.trim();
-    }
-
-    // Reset form
-    this.selectedReasons.clear();
-    document.querySelectorAll('input[name="reportReason"]').forEach(cb => cb.checked = false);
-    document.getElementById('otherReasonDetails').value = '';
-    document.getElementById('otherReasonSection').style.display = 'none';
-    document.querySelector('[data-action="submit-report"]').disabled = true;
-
-    // Show modal
-    const modal = document.getElementById('marketplaceReportModal');
-    modal.classList.add('show');
-}
-
-    closeReportModal() {
-        const modal = document.getElementById('marketplaceReportModal');
-        modal.classList.remove('show');
-        this.selectedReasons.clear();
-        this.currentListing = null;
-    }
-
-    handleReasonChange(checkbox) {
-        if (checkbox.checked) {
-            this.selectedReasons.add(checkbox.value);
-        } else {
-            this.selectedReasons.delete(checkbox.value);
-        }
-
-        // Show/hide other reason textarea
-        const otherSection = document.getElementById('otherReasonSection');
-        if (this.selectedReasons.has('other')) {
-            otherSection.style.display = 'block';
-        } else {
-            otherSection.style.display = 'none';
-        }
-
-        this.validateForm();
-    }
-
-    validateForm() {
-        const submitBtn = document.querySelector('[data-action="submit-report"]');
-        const hasReasons = this.selectedReasons.size > 0;
-        const otherDetails = document.getElementById('otherReasonDetails').value.trim();
-        
-        if (this.selectedReasons.has('other') && !otherDetails) {
-            submitBtn.disabled = true;
-        } else {
-            submitBtn.disabled = !hasReasons;
-        }
+        // Clear textarea
+        const textarea = this.drawer.querySelector('#reportDetails');
+        const charCount = this.drawer.querySelector('#reportCharCount');
+        if (textarea) textarea.value = '';
+        if (charCount) charCount.textContent = '0';
     }
 
     async submitReport() {
-        if (!this.currentListing || this.selectedReasons.size === 0) return;
+        if (this.selectedReasons.size === 0) {
+            showToast('Please select at least one reason', 'warning');
+            return;
+        }
 
-        const otherDetails = document.getElementById('otherReasonDetails').value.trim();
-        const reasons = Array.from(this.selectedReasons);
-        
+        if (!this.currentListing) {
+            showToast('Listing information missing', 'error');
+            return;
+        }
+
+        if (!state?.currentUser) {
+            return;
+        }
+
+        const submitBtn = this.drawer.querySelector('[data-action="submit-report"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
         try {
-            // Save report to Firestore
-            const reportId = `marketplace_report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            await setDoc(doc(db, 'marketplace_reports', reportId), {
-                listing_id: this.currentListing.id,
-                listing_title: this.currentListing.title,
-                listing_type: this.currentListing.type || 'sale',
-                category: this.currentListing.category,
-                seller_contact: this.currentListing.contact,
-                reasons: reasons,
-                other_details: otherDetails,
-                reported_at: serverTimestamp(),
+            const reportData = {
+                listingId: this.currentListing.id,
+                listingTitle: this.currentListing.title,
+                listingOwner: this.currentListing.owner || 'unknown',
+                reportedBy: state.currentUser.uid,
+                reporterEmail: state.currentUser.email,
+                reasons: Array.from(this.selectedReasons),
+                details: this.drawer.querySelector('#reportDetails').value.trim(),
+                timestamp: new Date().toISOString(),
                 status: 'pending',
-                reporter_uid: window.state?.currentUser?.uid || 'anonymous'
-            });
+                itemType: 'marketplace'
+            };
 
-            // Track event
-            trackEvent('marketplace_item_reported', {
+            // Save to Firestore
+            const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            await setDoc(doc(db, 'marketplaceReports', reportId), reportData);
+
+            trackEvent('report_submitted', {
                 item_id: this.currentListing.id,
-                item_type: this.currentListing.type || 'sale',
-                reasons: reasons,
-                has_other_details: !!otherDetails
+                reasons: reportData.reasons,
+                item_type: 'marketplace'
             });
 
-            // Success feedback
-            showToast('Report submitted successfully', 'success');
-            this.closeReportModal();
-
+            showToast('Thank you for your report. We will review it shortly.', 'success');
+            this.closeDrawer();
         } catch (error) {
-            console.error('Error submitting marketplace report:', error);
+            console.error('❌ Error submitting report:', error);
             showToast('Failed to submit report. Please try again.', 'error');
+            
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         }
     }
 }
@@ -249,16 +387,15 @@ class MarketplaceReporting {
 // Create singleton instance
 const marketplaceReporting = new MarketplaceReporting();
 
-// Export functions
-export function openMarketplaceReportModal(listingData = null) {
-    marketplaceReporting.openReportModal(listingData);
+// Export function to open report drawer
+export function openMarketplaceReportModal(listing) {
+    marketplaceReporting.openDrawer(listing);
 }
 
+// Setup function for initialization
 export function setupMarketplaceReporting() {
-    // Already initialized via singleton
-    console.log('🛡️ Marketplace reporting initialized');
+    console.log('✅ Marketplace reporting initialized');
 }
 
-// Make globally available
+// Make it globally available for existing code
 window.openMarketplaceReportModal = openMarketplaceReportModal;
-

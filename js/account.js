@@ -71,15 +71,20 @@ export function renderAccount() {
     const isAuthed = !!state.currentUser && !!state.profile;
     console.log('🔐 renderAccount() - currentUser:', !!state.currentUser, 'profile:', !!state.profile);
 
-    // Helper functions
-    const hideMyPosts = () => {
-        const myPostsContainer = document.getElementById('myPostsContainer');
-        if (myPostsContainer) myPostsContainer.style.display = 'none';
-    };
-    const showMyPosts = () => {
-        const myPostsContainer = document.getElementById('myPostsContainer');
-        if (myPostsContainer) myPostsContainer.style.display = 'block';
-    };
+  // Helper functions
+const hideMyPosts = () => {
+    const myPostsContainer = document.getElementById('myPostsContainer');
+    const tabIndicator = document.getElementById('tabIndicator');
+    if (myPostsContainer) myPostsContainer.style.display = 'none';
+    if (tabIndicator) tabIndicator.style.display = 'none';
+};
+
+const showMyPosts = () => {
+    const myPostsContainer = document.getElementById('myPostsContainer');
+    const tabIndicator = document.getElementById('tabIndicator');
+    if (myPostsContainer) myPostsContainer.style.display = 'block';
+    if (tabIndicator) tabIndicator.style.display = 'flex';
+};
     const hideAdmin = () => {
         const admin = document.getElementById('adminDashboard');
         if (admin) admin.style.display = 'none';

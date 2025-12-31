@@ -1,8 +1,7 @@
 // ===========================================
 // toast-notifications.js
-// ===========================================
-// Modern, native-feeling toast notification system
-// Features: Bottom slide-up, stacking, gestures, icons
+// Clean, elegant, modern toast notifications
+// No icons - just beautiful, minimal toasts
 // ===========================================
 
 class ToastManager {
@@ -13,7 +12,6 @@ class ToastManager {
     }
 
     init() {
-        // Create toast container if it doesn't exist
         if (!document.getElementById('toast-container')) {
             this.container = document.createElement('div');
             this.container.id = 'toast-container';
@@ -26,10 +24,8 @@ class ToastManager {
 
     show(message, type = 'success', options = {}) {
         const defaults = {
-            duration: 3000,
-            dismissible: true,
-            action: null,
-            actionLabel: 'Undo'
+            duration: 4000,
+            dismissible: true
         };
 
         const config = { ...defaults, ...options };
@@ -62,23 +58,14 @@ class ToastManager {
         const toast = document.createElement('div');
         toast.className = `toast-notification toast-${type}`;
 
-        // Icon based on type
-        const icon = this.getIcon(type);
-
-        // Build toast HTML
+        // Clean, simple HTML - no icons
         toast.innerHTML = `
-            <div class="toast-icon">${icon}</div>
             <div class="toast-content">
                 <div class="toast-message">${this.escapeHtml(message)}</div>
             </div>
-            ${config.action ? `
-                <button class="toast-action" data-action="custom">
-                    ${config.actionLabel}
-                </button>
-            ` : ''}
             ${config.dismissible ? `
-                <button class="toast-dismiss" data-action="dismiss">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <button class="toast-dismiss" data-action="dismiss" aria-label="Dismiss">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 6L6 18M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -92,15 +79,6 @@ class ToastManager {
             config,
             timeout: null
         };
-
-        // Action button handler
-        if (config.action) {
-            const actionBtn = toast.querySelector('[data-action="custom"]');
-            actionBtn.addEventListener('click', () => {
-                config.action();
-                this.dismiss(toastObj);
-            });
-        }
 
         // Dismiss button handler
         if (config.dismissible) {
@@ -141,14 +119,11 @@ class ToastManager {
             isDragging = false;
 
             const deltaY = currentY - startY;
-
             toast.element.style.transition = '';
 
             if (deltaY > 50) {
-                // Dismiss if swiped down enough
                 this.dismiss(toast);
             } else {
-                // Reset position
                 toast.element.style.transform = '';
                 toast.element.style.opacity = '';
             }
@@ -179,31 +154,6 @@ class ToastManager {
         this.toasts.forEach(toast => this.dismiss(toast));
     }
 
-    getIcon(type) {
-        const icons = {
-            success: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M20 6L9 17l-5-5"></path>
-            </svg>`,
-            error: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>`,
-            warning: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>`,
-            info: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>`
-        };
-
-        return icons[type] || icons.info;
-    }
-
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -214,19 +164,18 @@ class ToastManager {
 // Create singleton instance
 const toastManager = new ToastManager();
 
-// Export the main function
+// Export main function
 export function showToast(message, type = 'success', options = {}) {
     return toastManager.show(message, type, options);
 }
 
-// Export additional utilities
+// Export utilities
 export function dismissAllToasts() {
     toastManager.dismissAll();
 }
 
-// Backwards compatibility - attach to window for inline onclick handlers
+// Backwards compatibility
 if (typeof window !== 'undefined') {
     window.showToast = showToast;
     window.dismissAllToasts = dismissAllToasts;
 }
-
