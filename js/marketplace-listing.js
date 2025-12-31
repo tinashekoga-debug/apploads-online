@@ -13,6 +13,8 @@
 import { trackEvent } from './firebase-config.js';
 import { escapeHtml, fmtMoney, getTimeAgo, showToast } from './ui.js'; // FIXED: Added openContact import
 import { state } from './main.js';
+import { authOpen } from './auth.js'; // or wherever it's defined
+import { openMarketplaceReportModal } from './marketplace-reporting.js'; // or wherever it's defined
 import { getRelatedListings, createRelatedCard } from './related-posts.js';
 import { ImageCarousel } from './image-carousel.js';
 import { openContact } from './contact-modal.js';
@@ -44,6 +46,7 @@ class MarketplaceListing {
 this.whatsappBtn = document.getElementById('whatsappBtn');
 this.messageBtn = document.getElementById('messageBtn');
 this.contactInfoBtn = document.getElementById('contactInfoBtn');
+        this.reportBtn = document.getElementById('reportBtn'); // ✅ ADD THIS LINE 
     
     // Listing content references
     this.listingPrice = document.getElementById('listingPrice');
@@ -350,19 +353,25 @@ if (this.fullscreenNext) {
     // Convert marketplace listing to load-like format for chat
     const listingForChat = {
         id: listing.id,
-        cargo: listing.title, // Use title as cargo equivalent
+        cargo: listing.title,
         originCity: listing.city,
         originCountry: listing.country,
-        destCity: listing.city, // Same for marketplace
+        destCity: listing.city,
         destCountry: listing.country,
         price: listing.price,
         currency: listing.currency || 'USD',
         owner: listing.owner,
         contact: listing.contact,
-        type: 'marketplace' // Flag for chat context
+        type: 'marketplace'
     };
     
-    openLoadChat(listingForChat);
+    // ✅ FIX: Close the listing modal first
+    this.closeListing();
+    
+    // ✅ Then open the chat after a brief delay to let the modal close
+    setTimeout(() => {
+        openLoadChat(listingForChat);
+    }, 300); // Match your fade-out duration (250ms + small buffer)
 }
     
   handleReport() {
@@ -375,22 +384,22 @@ if (this.fullscreenNext) {
         item_title: listing.title
     });
     
-    // Check if user is logged in
-    if (!window.state?.currentUser) {
-        showToast('Please sign in to report listings', 'warning');
+    // ✅ FIX: Use imported state consistently
+    if (!state?.currentUser) {
         
-        // Open auth modal instead
+        // ✅ FIX: Use imported function
         if (typeof authOpen === 'function') {
             authOpen();
         }
         return;
     }
     
-    // Open marketplace reporting modal
+    // ✅ FIX: Use imported function
     if (typeof openMarketplaceReportModal === 'function') {
         openMarketplaceReportModal(listing);
     } else {
-        showToast('Reporting feature coming soon', 'warning');
+        console.warn('Report modal function not available');
+        showToast('Reporting feature is not available yet', 'warning');
     }
 }
 
