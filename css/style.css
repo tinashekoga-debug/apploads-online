@@ -2528,12 +2528,491 @@ body.drawer-open {
   visibility: visible;
 }
 
+/* ========================= */
+/* Full-Screen Listing Overlay */
+/* ========================= */
+
+.listing-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    padding: 0;
+}
+
+.listing-overlay:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+}
+
+.listing-overlay.hidden {
+    display: none;
+}
+
+.listing-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+./* Modern Close Button */
+.listing-close-btn {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 2001 !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.listing-close-btn:hover {
+    background: rgba(0, 0, 0, 0.9) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.listing-close-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* Carousel */
+.listing-carousel {
+    position: relative;
+    width: 100%;
+    height: 55vh;
+    background: #f8f9fa;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
+.carousel-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.carousel-slide {
+    flex: 0 0 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carousel-counter {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    z-index: 10;
+}
+
+.carousel-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.carousel-prev {
+    left: 16px;
+}
+
+.carousel-next {
+    right: 16px;
+}
+
+.carousel-nav.hidden {
+    display: none;
+}
+
+/* Content Area */
+.listing-content {
+    padding: 20px 16px 40px;
+}
+
+.listing-summary {
+    margin-bottom: 24px;
+}
+
+.listing-price {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #0b7d62;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.listing-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.listing-meta {
+    font-size: 0.95rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Sections */
+.listing-section {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.listing-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #1f2937;
+}
+
+.listing-description {
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+.listing-description p {
+    margin-bottom: 12px;
+}
+
+.listing-description p:last-child {
+    margin-bottom: 0;
+}
+
+/* Contact Actions */
+.contact-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn.full-width {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.whatsapp-btn {
+    background: #008037 !important;
+    color: white !important;
+}
+
+.whatsapp-btn:hover {
+    background: #006b2e !important;
+    transform: translateY(-2px);
+}
+
+.contact-info-btn {
+    background: #0b7d62 !important;
+    color: white !important;
+}
+
+.contact-info-btn:hover {
+    background: #096c54 !important;
+    transform: translateY(-2px);
+}
+
+/* Related Listings */
+.related-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.related-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.related-card {
+    flex: 0 0 200px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.related-card:hover {
+    transform: translateY(-2px);
+    border-color: #0b7d62;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.related-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.related-details {
+    padding: 12px;
+}
+
+.related-price {
+    font-weight: 700;
+    color: #0b7d62;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.related-title {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.related-location {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+/* Responsive Adjustments */
+@media (min-width: 768px) {
+    .listing-overlay {
+        padding: 20px;
+    }
+    
+    .listing-container {
+        max-width: 500px;
+        max-height: 90vh;
+        height: auto;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .listing-carousel {
+        height: 300px;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .listing-close-btn {
+        top: 24px;
+        right: 24px;
+    }
+}
+
+/* Prevent body scroll when listing is open */
+body.listing-open {
+    overflow: hidden;
+}
+
+/* ========================= */
+/* Modern Close Buttons for All Modals */
+/* ========================= */
+
+div#listingOverlay button.listing-close-btn#listingCloseBtn {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: rgba(0, 0, 0, 0.4) !important; /* Changed from 0.8 to 0.6 */
+    border: none !important;
+    border-radius: 50% !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 9999 !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+div#listingOverlay button.listing-close-btn#listingCloseBtn:hover {
+    background: rgba(0, 0, 0, 0.8) !important; /* Darker on hover */
+    transform: scale(1.1) !important;
+}
+
+#listingOverlay .listing-close-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: white !important;
+}
+
 /* Posting modal close button - dark stroke for visibility */
 #postModal .modal-close svg {
     width: 20px !important;
     height: 20px !important;
     stroke: #000000 !important;
     stroke-width: 2.5 !important;
+}
+
+/* ========================= */
+/* Compact Contact Buttons */
+/* ========================= */
+
+.compact-contact-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.contact-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.whatsapp-btn {
+    background: #25D366;
+    color: white;
+}
+
+.contact-info-btn {
+    background: #007AFF;
+    color: white;
+}
+
+.copy-btn {
+    background: #8E8E93;
+    color: white;
+}
+
+.contact-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+.contact-icon {
+    font-size: 1rem;
+}
+
+/* ========================= */
+/* Compact Marketplace Layout */
+/* ========================= */
+
+/* Reduce section spacing */
+.listing-section {
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+}
+
+/* Reduce content padding */
+.listing-content {
+    padding: 16px 12px 30px !important;
+}
+
+/* Make summary more compact */
+.listing-summary {
+    margin-bottom: 16px !important;
+}
+
+/* Reduce price font size slightly */
+.listing-price {
+    font-size: 1.6rem !important;
+    margin-bottom: 6px !important;
+}
+
+/* Reduce title font size */
+.listing-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 6px !important;
+}
+
+/* Make meta info smaller */
+.listing-meta {
+    font-size: 0.9rem !important;
+}
+
+/* Reduce section title size */
+.section-title {
+    font-size: 1rem !important;
+    margin-bottom: 10px !important;
+}
+
+/* Make description more compact */
+.listing-description {
+    line-height: 1.5 !important;
+    font-size: 0.95rem !important;
 }
 
 /* ========================= */
@@ -2665,6 +3144,30 @@ body.fullscreen-open {
     transform: scale(1.02);
 }
 
+/* Icon Action Bar */
+.icon-action-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 8px 0;
+}
+
+.icon-action-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+    color: #666;
+}
+
 .icon-action-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
@@ -2700,26 +3203,26 @@ body.fullscreen-open {
 
 .icon-action-bar {
     display: flex;
-    justify-content: center;
+    justify-content: center; /* Changed from space-around */
     align-items: center;
-    gap: 6px;
-    margin-top: 0;
-    padding: 0;
-    flex-wrap: nowrap;
+    gap: 16px; /* Increased gap */
+    margin-top: 12px;
+    padding: 8px 0;
+    flex-wrap: nowrap; /* Prevent wrapping */
 }
 
 .icon-action-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px; /* Reduced from 6px - tighter spacing */
-    flex: 0 0 auto;
-    min-width: 68px; /* Slightly reduced */
+    gap: 6px;
+    flex: 0 0 auto; /* Changed from flex: 1 - prevents stretching */
+    min-width: 70px; /* Set consistent width */
 }
 
 .icon-action-btn {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border: none;
     border-radius: 50%;
     display: flex;
@@ -2729,7 +3232,6 @@ body.fullscreen-open {
     transition: all 0.2s ease;
     background: #8E8E93 !important;
     color: white;
-    flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .icon-action-btn:hover {
@@ -2754,12 +3256,11 @@ body.fullscreen-open {
 }
 
 .icon-action-label {
-    font-size: 10px;
+    font-size: 0.75rem;
     color: #666;
-    font-weight: 800;
+    font-weight: 500;
     text-align: center;
-    line-height: 1;
-    margin-top: -14px;
+    line-height: 1.2;
 }
 
 /* ========================= */
@@ -3783,6 +4284,564 @@ input:checked + .toggle-slider:before {
 
 .filter-chip .icon {
     margin-right: 6px;
+}
+
+/* ===========================================
+   TOAST NOTIFICATION SYSTEM
+   Modern, native-feeling notifications
+   Add this to the END of your style.css
+   =========================================== */
+
+.toast-container {
+    position: fixed;
+    bottom: 90px; /* Above bottom nav tabs */
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+}
+
+.toast-notification {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    min-width: 280px;
+    max-width: 400px;
+    width: calc(100% - 32px);
+    pointer-events: auto;
+    transform: translateY(150%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Show animation - spring effect */
+.toast-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Hide animation - slide down */
+.toast-notification.hide {
+    transform: translateY(150%);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                opacity 0.2s ease;
+}
+
+/* Icon styling */
+.toast-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Remove any pseudo-elements that might add duplicate icons */
+.toast-icon::before,
+.toast-icon::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Ensure SVG is properly contained */
+.toast-icon svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+.toast-notification.show .toast-icon {
+    animation: iconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+}
+
+@keyframes iconPop {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Content area */
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-message {
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: #1f2937;
+    word-wrap: break-word;
+}
+
+/* Action button */
+.toast-action {
+    background: none;
+    border: none;
+    color: var(--brand);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.toast-action:hover {
+    background: rgba(11, 125, 98, 0.1);
+}
+
+.toast-action:active {
+    background: rgba(11, 125, 98, 0.2);
+    transform: scale(0.95);
+}
+
+/* Dismiss button */
+.toast-dismiss {
+    background: none;
+    border: none;
+    color: #6b7280;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.toast-dismiss:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+.toast-dismiss:active {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(0.9);
+}
+
+/* =========================================== */
+/* TYPE-SPECIFIC STYLES */
+/* =========================================== */
+
+/* Success Toast */
+.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+.toast-success .toast-icon {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+}
+
+/* Error Toast */
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast-error .toast-icon {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+}
+
+/* Warning Toast */
+.toast-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.toast-warning .toast-icon {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+}
+
+/* Info Toast */
+.toast-info {
+    border-left: 4px solid #3b82f6;
+}
+
+.toast-info .toast-icon {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+}
+
+/* =========================================== */
+/* DARK MODE SUPPORT */
+/* =========================================== */
+
+@media (prefers-color-scheme: dark) {
+    .toast-notification {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            0 2px 8px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .toast-message {
+        color: #f9fafb;
+    }
+
+    .toast-dismiss {
+        color: #9ca3af;
+    }
+
+    .toast-dismiss:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #d1d5db;
+    }
+}
+
+/* =========================================== */
+/* RESPONSIVE ADJUSTMENTS */
+/* =========================================== */
+
+@media (max-width: 480px) {
+    .toast-container {
+        bottom: 85px;
+        padding: 0 12px;
+    }
+
+    .toast-notification {
+        min-width: auto;
+        padding: 12px 14px;
+        border-radius: 14px;
+    }
+
+    .toast-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .toast-message {
+        font-size: 14px;
+    }
+
+    .toast-action {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+}
+
+/* =========================================== */
+/* STACKING BEHAVIOR */
+/* =========================================== */
+
+.toast-notification:not(:last-child) {
+    margin-bottom: -4px;
+    transform: translateY(0) scale(0.96);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.toast-notification.show:not(:last-child) {
+    animation: stackDown 0.3s ease forwards;
+}
+
+@keyframes stackDown {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) scale(0.96);
+        opacity: 0.7;
+    }
+}
+
+/* =========================================== */
+/* ACCESSIBILITY */
+/* =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-notification {
+        transition: opacity 0.2s ease;
+    }
+
+    .toast-notification.show {
+        animation: none;
+    }
+
+    .toast-icon {
+        animation: none !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+.toast-action:focus,
+.toast-dismiss:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+
+/* ========================= */
+/* Modern Confirm Dialog */
+/* ========================= */
+
+#confirmModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+#confirmModal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+#confirmModal.hidden {
+    display: none;
+}
+
+.confirm-dialog {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 400px;
+    width: 100%;
+    padding: 24px;
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+#confirmModal.show .confirm-dialog {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.confirm-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.confirm-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: iconBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+}
+
+@keyframes iconBounce {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.confirm-icon.danger {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+}
+
+.confirm-icon.warning {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #92400e;
+}
+
+.confirm-icon.info {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+}
+
+.confirm-icon.success {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+}
+
+.confirm-text {
+    flex: 1;
+}
+
+.confirm-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.confirm-message {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.confirm-description {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 8px 0 0 0;
+    line-height: 1.4;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.confirm-actions .btn {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.confirm-actions .btn.secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.confirm-actions .btn.secondary:hover {
+    background: #e5e7eb;
+}
+
+.confirm-actions .btn.danger {
+    background: #ef4444;
+    color: white;
+}
+
+.confirm-actions .btn.danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+.confirm-actions .btn.warning {
+    background: var(--warning);
+    color: white;
+}
+
+.confirm-actions .btn.warning:hover {
+    background: #f97316;
+    transform: translateY(-1px);
+}
+
+/* Focus styles for accessibility */
+.confirm-actions .btn:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+
+/* Mobile optimization */
+@media (max-width: 480px) {
+    #confirmModal {
+        padding: 16px;
+    }
+    
+    .confirm-dialog {
+        padding: 20px;
+    }
+    
+    .confirm-icon {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .confirm-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .confirm-title {
+        font-size: 1rem;
+    }
+    
+    .confirm-message {
+        font-size: 0.9rem;
+    }
+    
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .confirm-dialog {
+        background: #1f2937;
+    }
+    
+    .confirm-title {
+        color: #f9fafb;
+    }
+    
+    .confirm-message {
+        color: #d1d5db;
+    }
+    
+    .confirm-description {
+        color: #9ca3af;
+    }
+}
+
+/* Prevent body scroll when modal is open */
+body:has(#confirmModal.show) {
+    overflow: hidden;
 }
 
 /* Status badges */

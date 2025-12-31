@@ -77,16 +77,56 @@ export function showConfirm(message, options = {}) {
 // Set Type Styling
 // =========================
 function setConfirmType(type, iconEl, confirmBtn) {
-    // Reset button classes
+    // Reset classes
+    iconEl.className = 'confirm-icon';
     confirmBtn.className = 'btn';
     
-    // Set button class based on type
-    if (type === 'danger') {
-        confirmBtn.classList.add('danger');
-    } else if (type === 'warning') {
-        confirmBtn.classList.add('warning');
+    switch (type) {
+        case 'danger':
+            iconEl.classList.add('danger');
+            confirmBtn.classList.add('danger');
+            iconEl.innerHTML = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            `;
+            break;
+            
+        case 'warning':
+            iconEl.classList.add('warning');
+            confirmBtn.classList.add('warning');
+            iconEl.innerHTML = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            `;
+            break;
+            
+        case 'info':
+            iconEl.classList.add('info');
+            iconEl.innerHTML = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+            `;
+            break;
+            
+        case 'success':
+            iconEl.classList.add('success');
+            iconEl.innerHTML = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+            `;
+            break;
     }
-    // No special styling for info/success
 }
 
 // =========================
